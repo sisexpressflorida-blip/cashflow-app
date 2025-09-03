@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cashflow</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+
+  <!-- Header -->
+  <header class="bg-purple-700 text-white p-4 flex items-center">
+    <img src="./igrejaFlorida.jpeg" alt="Logo" class="w-10 h-10 rounded-full mr-3">
+    <h1 class="text-xl font-bold">💰 Cashflow</h1>
+  </header>
+
+  <!-- Resumo -->
+  <section class="grid grid-cols-3 gap-2 p-3">
+    <div class="bg-white rounded-2xl shadow p-3 text-center">
+      <p id="totalReceitas" class="text-green-600 font-bold text-lg">R$ 0,00</p>
+      <span class="text-sm">Receitas</span>
+    </div>
+    <div class="bg-white rounded-2xl shadow p-3 text-center">
+      <p id="totalDespesas" class="text-red-600 font-bold text-lg">R$ 0,00</p>
+      <span class="text-sm">Despesas</span>
+    </div>
+    <div class="bg-white rounded-2xl shadow p-3 text-center">
+      <p id="saldo" class="text-blue-600 font-bold text-lg">R$ 0,00</p>
+      <span class="text-sm">Saldo</span>
+    </div>
+  </section>
+
+  <!-- Filtro -->
+  <div class="px-3 mb-3">
+    <label for="filtroMes" class="mr-2">Filtrar por mês:</label>
+    <select id="filtroMes" class="border rounded-lg p-1" onchange="atualizarDashboard()">
+      <option value="todos">Todos</option>
+      <option value="01">Jan</option>
+      <option value="02">Fev</option>
+      <option value="03">Mar</option>
+      <option value="04">Abr</option>
+      <option value="05">Mai</option>
+      <option value="06">Jun</option>
+      <option value="07">Jul</option>
+      <option value="08">Ago</option>
+      <option value="09">Set</option>
+      <option value="10">Out</option>
+      <option value="11">Nov</option>
+      <option value="12">Dez</option>
+    </select>
+  </div>
+
+  <!-- Lista de lançamentos -->
+  <section id="listaLancamentos" class="space-y-2 px-3"></section>
+
+  <!-- Botão adicionar -->
+  <button onclick="abrirModalNovo()" class="fixed bottom-6 right-6 bg-purple-600 text-white w-14 h-14 rounded-full text-2xl flex items-center justify-center shadow-lg">+</button>
+
+  <!-- Modal Novo -->
+  <div id="modalNovo" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+    <div class="bg-white rounded-2xl shadow-lg p-5 w-96">
+      <h3 class="text-lg font-bold mb-3">Novo Lançamento</h3>
+      <select id="tipo" class="w-full border rounded-lg p-2 mb-2">
+        <option value="receita">Receita</option>
+        <option value="despesa">Despesa</option>
+      </select>
+      <input id="categoria" class="w-full border rounded-lg p-2 mb-2" placeholder="Categoria">
+      <input id="valor" type="number" step="0.01" class="w-full border rounded-lg p-2 mb-2" placeholder="Valor">
+      <input id="descricao" class="w-full border rounded-lg p-2 mb-2" placeholder="Descrição">
+      <input id="data" type="date" class="w-full border rounded-lg p-2 mb-4">
+      <button onclick="adicionarLancamento()" class="bg-purple-600 text-white px-4 py-2 rounded-lg font-bold w-full">Salvar</button>
+    </div>
+  </div>
+
+  <!-- Modal Editar -->
+  <div id="modalEditar" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+    <div class="bg-white rounded-2xl shadow-lg p-5 w-96">
+      <h3 class="text-lg font-bold mb-3">Editar Lançamento</h3>
+      <select id="tipoEditar" class="w-full border rounded-lg p-2 mb-2">
+        <option value="receita">Receita</option>
+        <option value="despesa">Despesa</option>
+      </select>
+      <input id="categoriaEditar" class="w-full border rounded-lg p-2 mb-2" placeholder="Categoria">
+      <input id="valorEditar" type="number" step="0.01" class="w-full border rounded-lg p-2 mb-2" placeholder="Valor">
+      <input id="descricaoEditar" class="w-full border rounded-lg p-2 mb-2" placeholder="Descrição">
+      <input id="dataEditar" type="date" class="w-full border rounded-lg p-2 mb-4">
+      <div class="flex justify-between">
+        <button onclick="salvarEdicao()" class="bg-purple-600 text-white px-4 py-2 rounded-lg font-bold">Salvar</button>
+        <button onclick="excluirLancamento()" class="bg-red-500 text-white px-4 py-2 rounded-lg font-bold">Excluir</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let lancamentos = JSON.parse(localStorage.getItem("lancamentos")) || [];
+    let editIndex = null;
+
+    function formatarMoeda(valor) {
+      return valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+    }
+
+    function formatarData(dataStr) {
+      let data = new Date(dataStr);
+      let opcoes = { day: '2-digit', month: 'short', year: 'numeric' };
+      return data.toLocaleDateString("pt-BR", opcoes);
+    }
+
+    function abrirModalNovo() {
+      document.getElementById("modalNovo").classList.remove("hidden");
+    }
+
+    function abrirModalEditar(index) {
+      editIndex = index;
+      let l = lancamentos[index];
+
+      document.getElementById("tipoEditar").value = l.tipo;
+      document.getElementById("categoriaEditar").value = l.categoria;
+      document.getElementById("valorEditar").value = l.valor;
+      document.getElementById("descricaoEditar").value = l.descricao;
+      document.getElementById("dataEditar").value = l.data;
+
+      document.getElementById("modalEditar").classList.remove("hidden");
+    }
+
+    function adicionarLancamento() {
+      let novo = {
+        tipo: document.getElementById("tipo").value,
+        categoria: document.getElementById("categoria").value,
+        valor: parseFloat(document.getElementById("valor").value),
+        descricao: document.getElementById("descricao").value,
+        data: document.getElementById("data").value
+      };
+
+      lancamentos.push(novo);
+      localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
+      document.getElementById("modalNovo").classList.add("hidden");
+      atualizarDashboard();
+    }
+
+    function salvarEdicao() {
+      if (editIndex === null) return;
+      lancamentos[editIndex] = {
+        tipo: document.getElementById("tipoEditar").value,
+        categoria: document.getElementById("categoriaEditar").value,
+        valor: parseFloat(document.getElementById("valorEditar").value),
+        descricao: document.getElementById("descricaoEditar").value,
+        data: document.getElementById("dataEditar").value
+      };
+      localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
+      document.getElementById("modalEditar").classList.add("hidden");
+      atualizarDashboard();
+    }
+
+    function excluirLancamento() {
+      if (editIndex === null) return;
+      if (confirm("Deseja realmente excluir?")) {
+        lancamentos.splice(editIndex, 1);
+        localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
+        document.getElementById("modalEditar").classList.add("hidden");
+        atualizarDashboard();
+      }
+    }
+
+    function atualizarDashboard() {
+      let receitas = 0, despesas = 0;
+      let mesSelecionado = document.getElementById("filtroMes").value;
+      let lista = document.getElementById("listaLancamentos");
+      lista.innerHTML = "";
+
+      lancamentos.forEach((l, index) => {
+        let mesLanc = l.data.split("-")[1];
+        if (mesSelecionado !== "todos" && mesLanc !== mesSelecionado) return;
+
+        if (l.tipo === "receita") receitas += l.valor;
+        else despesas += l.valor;
+
+        let div = document.createElement("div");
+        div.className = "bg-white p-3 rounded-2xl shadow flex justify-between cursor-pointer";
+        div.onclick = () => abrirModalEditar(index);
+        div.innerHTML = `
+          <span>${formatarData(l.data)} - ${l.categoria} (${l.descricao || ""})</span>
+          <span class="${l.tipo === "receita" ? "text-green-600" : "text-red-600"} font-bold">${formatarMoeda(l.valor)}</span>
+        `;
+        lista.appendChild(div);
+      });
+
+      document.getElementById("totalReceitas").innerText = formatarMoeda(receitas);
+      document.getElementById("totalDespesas").innerText = formatarMoeda(despesas);
+      document.getElementById("saldo").innerText = formatarMoeda(receitas - despesas);
+    }
+
+    atualizarDashboard();
+  </script>
+</body>
+</html>
