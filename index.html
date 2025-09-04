@@ -1,151 +1,137 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="transition-colors duration-300">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cashflow</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class'
+    }
+  </script>
 </head>
-<body class="bg-gray-100">
+<body class="bg-gray-100 dark:bg-gray-900 dark:text-gray-200 transition-colors duration-300">
 
   <!-- Header -->
-  <header class="bg-purple-700 text-white p-4 flex items-center">
-    <img src="./igrejaFlorida.jpeg" alt="Logo" class="w-10 h-10 rounded-full mr-3">
-    <h1 class="text-xl font-bold">💰 Cashflow IAAP - Orlando</h1>
+  <header class="bg-purple-700 dark:bg-purple-900 text-white p-4 flex justify-between items-center">
+    <div class="flex items-center">
+      <img src="./igrejaFlorida.jpeg" alt="Logo" class="w-10 h-10 rounded-full mr-3">
+      <h1 class="text-xl font-bold">💰 Cashflow IAAP - Orlando</h1>
+    </div>
+    <div class="flex space-x-3">
+      <button onclick="toggleFiltros()" class="bg-white/20 px-3 py-1 rounded-lg hover:bg-white/30">🔍 Filtros</button>
+      <button onclick="toggleDarkMode()" class="bg-white/20 px-3 py-1 rounded-lg hover:bg-white/30">🌙</button>
+    </div>
   </header>
 
-  <!-- Resumo -->
-  <section class="grid grid-cols-3 gap-2 p-3">
-    <div class="bg-white rounded-2xl shadow p-3 text-center">
-      <p id="totalReceitas" class="text-green-600 font-bold text-lg">$ 0,00</p>
-      <span class="text-sm">Receitas</span>
-    </div>
-    <div class="bg-white rounded-2xl shadow p-3 text-center">
-      <p id="totalDespesas" class="text-red-600 font-bold text-lg">$ 0,00</p>
-      <span class="text-sm">Despesas</span>
-    </div>
-    <div class="bg-white rounded-2xl shadow p-3 text-center">
-      <p id="saldo" class="text-blue-600 font-bold text-lg">$ 0,00</p>
-      <span class="text-sm">Saldo</span>
-    </div>
-  </section>
+  <!-- Container principal -->
+  <div class="flex flex-col md:flex-row">
+    
+    <!-- Coluna esquerda (Resumo + Filtros + Lista) -->
+    <div class="flex-1 p-3">
 
-  <!-- Filtros -->
-  <div class="px-3 mb-3 flex flex-wrap items-center space-x-2">
-    <label for="filtroMes">Mês:</label>
-    <select id="filtroMes" class="border rounded-lg p-1" onchange="atualizarDashboard()">
-      <option value="todos">Todos</option>
-      <option value="01">Jan</option>
-      <option value="02">Fev</option>
-      <option value="03">Mar</option>
-      <option value="04">Abr</option>
-      <option value="05">Mai</option>
-      <option value="06">Jun</option>
-      <option value="07">Jul</option>
-      <option value="08">Ago</option>
-      <option value="09">Set</option>
-      <option value="10">Out</option>
-      <option value="11">Nov</option>
-      <option value="12">Dez</option>
-    </select>
+      <!-- Resumo -->
+      <section class="grid grid-cols-3 gap-2 mb-3">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow p-3 text-center">
+          <p id="totalReceitas" class="text-green-600 font-bold text-lg">$ 0.00</p>
+          <span class="text-sm">Receitas</span>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow p-3 text-center">
+          <p id="totalDespesas" class="text-red-600 font-bold text-lg">$ 0.00</p>
+          <span class="text-sm">Despesas</span>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow p-3 text-center">
+          <p id="saldo" class="text-blue-600 font-bold text-lg">$ 0.00</p>
+          <span class="text-sm">Saldo</span>
+        </div>
+      </section>
 
-    <label for="dataDe" class="ml-3">De:</label>
-    <input type="date" id="dataDe" class="border rounded-lg p-1" onchange="atualizarDashboard()">
+      <!-- Filtros (ocultos/visíveis via botão) -->
+      <div id="filtros" class="hidden mb-4">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow p-4 flex flex-wrap gap-3 items-center">
+          <label for="filtroMes">Mês:</label>
+          <select id="filtroMes" class="border rounded-lg p-1 dark:bg-gray-700" onchange="atualizarDashboard()">
+            <option value="todos">Todos</option>
+            <option value="01">Jan</option><option value="02">Fev</option><option value="03">Mar</option>
+            <option value="04">Abr</option><option value="05">Mai</option><option value="06">Jun</option>
+            <option value="07">Jul</option><option value="08">Ago</option><option value="09">Set</option>
+            <option value="10">Out</option><option value="11">Nov</option><option value="12">Dez</option>
+          </select>
+          <label for="dataDe">De:</label>
+          <input type="date" id="dataDe" class="border rounded-lg p-1 dark:bg-gray-700" onchange="atualizarDashboard()">
+          <label for="dataAte">Até:</label>
+          <input type="date" id="dataAte" class="border rounded-lg p-1 dark:bg-gray-700" onchange="atualizarDashboard()">
+        </div>
+      </div>
 
-    <label for="dataAte" class="ml-3">Até:</label>
-    <input type="date" id="dataAte" class="border rounded-lg p-1" onchange="atualizarDashboard()">
+      <!-- Lista de lançamentos -->
+      <section id="listaLancamentos" class="space-y-2"></section>
+    </div>
+
+    <!-- Coluna direita (Gráficos em desktop, abaixo em mobile) -->
+    <aside class="md:w-1/3 p-3 space-y-4">
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow p-4">
+        <h3 class="text-center font-bold mb-2">Despesas por Categoria</h3>
+        <canvas id="graficoCategorias"></canvas>
+      </div>
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow p-4">
+        <h3 class="text-center font-bold mb-2">Fluxo Mensal</h3>
+        <canvas id="graficoMensal"></canvas>
+      </div>
+    </aside>
   </div>
-
-  <!-- Lista de lançamentos -->
-  <section id="listaLancamentos" class="space-y-2 px-3"></section>
 
   <!-- Botão adicionar -->
   <button onclick="abrirModalNovo()" class="fixed bottom-6 right-6 bg-purple-600 text-white w-14 h-14 rounded-full text-2xl flex items-center justify-center shadow-lg">+</button>
 
   <!-- Modal Novo -->
   <div id="modalNovo" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-    <div class="bg-white rounded-2xl shadow-lg p-5 w-96">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-5 w-96">
       <div class="flex justify-between items-center mb-3">
         <h3 class="text-lg font-bold">Novo Lançamento</h3>
         <button onclick="fecharModal('modalNovo')" class="text-gray-500 hover:text-gray-800 text-xl font-bold">&times;</button>
       </div>
-
-      <!-- Data -->
-      <input id="data" type="date" class="w-full border rounded-lg p-2 mb-2">
-
-      <!-- Tipo -->
+      <input id="data" type="date" class="w-full border rounded-lg p-2 mb-2 dark:bg-gray-700">
       <div class="flex space-x-3 mb-2">
-        <label class="flex items-center space-x-1">
-          <input type="radio" name="tipo" id="tipoReceita" value="receita" checked>
-          <span>+ Receita</span>
-        </label>
-        <label class="flex items-center space-x-1">
-          <input type="radio" name="tipo" id="tipoDespesa" value="despesa">
-          <span>- Despesa</span>
-        </label>
+        <label class="flex items-center space-x-1"><input type="radio" name="tipo" id="tipoReceita" value="receita" checked><span>+ Receita</span></label>
+        <label class="flex items-center space-x-1"><input type="radio" name="tipo" id="tipoDespesa" value="despesa"><span>- Despesa</span></label>
       </div>
-
-      <!-- Categoria -->
-      <input id="categoria" class="w-full border rounded-lg p-2 mb-2" placeholder="Categoria">
-
-      <!-- Valor + Meio -->
+      <input id="categoria" class="w-full border rounded-lg p-2 mb-2 dark:bg-gray-700" placeholder="Categoria">
       <div class="flex space-x-2 mb-2">
-        <input id="valor" type="number" step="0.01" class="w-1/2 border rounded-lg p-2" placeholder="Valor">
-        <select id="meio" class="w-1/2 border rounded-lg p-2">
-          <option value="Velle" selected>Velle</option>
-          <option value="Dinheiro">Dinheiro</option>
-          <option value="Cartão">Cartão</option>
-          <option value="Outros">Outros</option>
+        <input id="valor" type="number" step="0.01" class="w-1/2 border rounded-lg p-2 dark:bg-gray-700" placeholder="Valor">
+        <select id="meio" class="w-1/2 border rounded-lg p-2 dark:bg-gray-700">
+          <option value="Velle" selected>Velle</option><option value="Dinheiro">Dinheiro</option>
+          <option value="Cartão">Cartão</option><option value="Outros">Outros</option>
         </select>
       </div>
-
-      <!-- Descrição -->
-      <input id="descricao" class="w-full border rounded-lg p-2 mb-4" placeholder="Descrição">
-
+      <input id="descricao" class="w-full border rounded-lg p-2 mb-4 dark:bg-gray-700" placeholder="Descrição">
       <button onclick="adicionarLancamento()" class="bg-purple-600 text-white px-4 py-2 rounded-lg font-bold w-full">Salvar</button>
     </div>
   </div>
 
   <!-- Modal Editar -->
   <div id="modalEditar" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-    <div class="bg-white rounded-2xl shadow-lg p-5 w-96">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-5 w-96">
       <div class="flex justify-between items-center mb-3">
         <h3 class="text-lg font-bold">Editar Lançamento</h3>
         <button onclick="fecharModal('modalEditar')" class="text-gray-500 hover:text-gray-800 text-xl font-bold">&times;</button>
       </div>
-
-      <!-- Data -->
-      <input id="dataEditar" type="date" class="w-full border rounded-lg p-2 mb-2">
-
-      <!-- Tipo -->
+      <input id="dataEditar" type="date" class="w-full border rounded-lg p-2 mb-2 dark:bg-gray-700">
       <div class="flex space-x-3 mb-2">
-        <label class="flex items-center space-x-1">
-          <input type="radio" name="tipoEditar" id="tipoEditarReceita" value="receita">
-          <span>+ Receita</span>
-        </label>
-        <label class="flex items-center space-x-1">
-          <input type="radio" name="tipoEditar" id="tipoEditarDespesa" value="despesa">
-          <span>- Despesa</span>
-        </label>
+        <label class="flex items-center space-x-1"><input type="radio" name="tipoEditar" id="tipoEditarReceita" value="receita"><span>+ Receita</span></label>
+        <label class="flex items-center space-x-1"><input type="radio" name="tipoEditar" id="tipoEditarDespesa" value="despesa"><span>- Despesa</span></label>
       </div>
-
-      <!-- Categoria -->
-      <input id="categoriaEditar" class="w-full border rounded-lg p-2 mb-2" placeholder="Categoria">
-
-      <!-- Valor + Meio -->
+      <input id="categoriaEditar" class="w-full border rounded-lg p-2 mb-2 dark:bg-gray-700" placeholder="Categoria">
       <div class="flex space-x-2 mb-2">
-        <input id="valorEditar" type="number" step="0.01" class="w-1/2 border rounded-lg p-2" placeholder="Valor">
-        <select id="meioEditar" class="w-1/2 border rounded-lg p-2">
-          <option value="Velle">Velle</option>
-          <option value="Dinheiro">Dinheiro</option>
-          <option value="Cartão">Cartão</option>
-          <option value="Outros">Outros</option>
+        <input id="valorEditar" type="number" step="0.01" class="w-1/2 border rounded-lg p-2 dark:bg-gray-700" placeholder="Valor">
+        <select id="meioEditar" class="w-1/2 border rounded-lg p-2 dark:bg-gray-700">
+          <option value="Velle">Velle</option><option value="Dinheiro">Dinheiro</option>
+          <option value="Cartão">Cartão</option><option value="Outros">Outros</option>
         </select>
       </div>
-
-      <!-- Descrição -->
-      <input id="descricaoEditar" class="w-full border rounded-lg p-2 mb-4" placeholder="Descrição">
-
+      <input id="descricaoEditar" class="w-full border rounded-lg p-2 mb-4 dark:bg-gray-700" placeholder="Descrição">
       <div class="flex justify-between">
         <button onclick="salvarEdicao()" class="bg-purple-600 text-white px-4 py-2 rounded-lg font-bold">Salvar</button>
         <button onclick="excluirLancamento()" class="bg-red-500 text-white px-4 py-2 rounded-lg font-bold">Excluir</button>
@@ -156,140 +142,40 @@
   <script>
     let lancamentos = JSON.parse(localStorage.getItem("lancamentos")) || [];
     let editIndex = null;
+    let chartCategorias, chartMensal;
 
-    function formatarMoeda(valor) {
-      return "$ " + valor.toFixed(2);
+    function formatarMoeda(valor){ return "$ " + valor.toFixed(2); }
+    function formatarData(dataStr){ if(!dataStr)return""; let[ano,mes,dia]=dataStr.split("-"); return `${dia}/${mes}/${ano}`;}
+
+    function toggleDarkMode(){ document.documentElement.classList.toggle("dark"); }
+    function toggleFiltros(){ document.getElementById("filtros").classList.toggle("hidden"); }
+
+    function abrirModalNovo(){ document.getElementById("modalNovo").classList.remove("hidden"); document.getElementById("data").value=new Date().toISOString().split("T")[0]; document.getElementById("tipoReceita").checked=true; document.getElementById("meio").value="Velle"; }
+    function adicionarLancamento(){ let tipo=document.querySelector('input[name="tipo"]:checked').value; let novo={tipo,categoria:document.getElementById("categoria").value,valor:parseFloat(document.getElementById("valor").value),descricao:document.getElementById("descricao").value,data:document.getElementById("data").value,meio:document.getElementById("meio").value}; lancamentos.push(novo); localStorage.setItem("lancamentos",JSON.stringify(lancamentos)); document.getElementById("modalNovo").classList.add("hidden"); limparCampos(); atualizarDashboard(); }
+    function abrirModalEditar(index){ editIndex=index; let l=lancamentos[index]; document.getElementById("dataEditar").value=l.data; document.getElementById("categoriaEditar").value=l.categoria; document.getElementById("valorEditar").value=l.valor; document.getElementById("descricaoEditar").value=l.descricao; document.getElementById("meioEditar").value=l.meio||"Velle"; if(l.tipo==="receita"){document.getElementById("tipoEditarReceita").checked=true;} else {document.getElementById("tipoEditarDespesa").checked=true;} document.getElementById("modalEditar").classList.remove("hidden"); }
+    function salvarEdicao(){ if(editIndex===null)return; let tipo=document.querySelector('input[name="tipoEditar"]:checked').value; lancamentos[editIndex]={tipo,categoria:document.getElementById("categoriaEditar").value,valor:parseFloat(document.getElementById("valorEditar").value),descricao:document.getElementById("descricaoEditar").value,data:document.getElementById("dataEditar").value,meio:document.getElementById("meioEditar").value}; localStorage.setItem("lancamentos",JSON.stringify(lancamentos)); document.getElementById("modalEditar").classList.add("hidden"); limparCampos(); atualizarDashboard(); }
+    function excluirLancamento(){ if(editIndex===null)return; if(confirm("Deseja realmente excluir?")){ lancamentos.splice(editIndex,1); localStorage.setItem("lancamentos",JSON.stringify(lancamentos)); document.getElementById("modalEditar").classList.add("hidden"); atualizarDashboard(); }}
+    function fecharModal(id){ document.getElementById(id).classList.add("hidden"); }
+    function limparCampos(){ ["categoria","valor","descricao"].forEach(id=>document.getElementById(id).value=""); ["categoriaEditar","valorEditar","descricaoEditar"].forEach(id=>document.getElementById(id).value=""); }
+
+    function atualizarGraficos(lancamentosFiltrados){ 
+      let categorias={}; lancamentosFiltrados.forEach(l=>{if(l.tipo==="despesa"){categorias[l.categoria]=(categorias[l.categoria]||0)+l.valor;}}); 
+      let labelsCat=Object.keys(categorias); let valoresCat=Object.values(categorias); if(chartCategorias)chartCategorias.destroy(); 
+      chartCategorias=new Chart(document.getElementById("graficoCategorias"),{type:"doughnut",data:{labels:labelsCat,datasets:[{data:valoresCat,backgroundColor:["#ef4444","#f97316","#eab308","#22c55e","#3b82f6","#a855f7"]}]}});
+
+      let receitasMes={},despesasMes={}; lancamentosFiltrados.forEach(l=>{let mes=l.data.slice(0,7); if(l.tipo==="receita"){receitasMes[mes]=(receitasMes[mes]||0)+l.valor;} else{despesasMes[mes]=(despesasMes[mes]||0)+l.valor;}}); 
+      let meses=[...new Set([...Object.keys(receitasMes),...Object.keys(despesasMes)])].sort(); if(chartMensal)chartMensal.destroy(); 
+      chartMensal=new Chart(document.getElementById("graficoMensal"),{type:"bar",data:{labels:meses,datasets:[{label:"Receitas",data:meses.map(m=>receitasMes[m]||0),backgroundColor:"#22c55e"},{label:"Despesas",data:meses.map(m=>despesasMes[m]||0),backgroundColor:"#ef4444"}]},options:{responsive:true,plugins:{legend:{position:"bottom"}},scales:{y:{beginAtZero:true}}}});
     }
 
-    function formatarData(dataStr) {
-      if (!dataStr) return "";
-      let [ano, mes, dia] = dataStr.split("-");
-      return `${dia}/${mes}/${ano}`;
+    function atualizarDashboard(){ 
+      let receitas=0,despesas=0; let mesSelecionado=document.getElementById("filtroMes").value; let dataDe=document.getElementById("dataDe").value; let dataAte=document.getElementById("dataAte").value; let lista=document.getElementById("listaLancamentos"); lista.innerHTML=""; 
+      let lancOrdenados=[...lancamentos].sort((a,b)=>new Date(a.data)-new Date(b.data)); let filtrados=[]; 
+      lancOrdenados.forEach((l,index)=>{let mesLanc=l.data.split("-")[1]; if(mesSelecionado!=="todos"&&mesLanc!==mesSelecionado)return; if(dataDe&&l.data<dataDe)return; if(dataAte&&l.data>dataAte)return; filtrados.push(l); if(l.tipo==="receita")receitas+=l.valor; else despesas+=l.valor; 
+        let div=document.createElement("div"); div.className="bg-white dark:bg-gray-800 p-3 rounded-2xl shadow flex justify-between cursor-pointer"; div.onclick=()=>abrirModalEditar(lancamentos.indexOf(l)); div.innerHTML=`<span>${formatarData(l.data)} - ${l.categoria} (${l.descricao||""}) [${l.meio||"Velle"}]</span> <span class="${l.tipo==="receita"?"text-green-600":"text-red-600"} font-bold">${formatarMoeda(l.valor)}</span>`; lista.appendChild(div); }); 
+      document.getElementById("totalReceitas").innerText=formatarMoeda(receitas); document.getElementById("totalDespesas").innerText=formatarMoeda(despesas); document.getElementById("saldo").innerText=formatarMoeda(receitas-despesas); 
+      atualizarGraficos(filtrados); 
     }
-
-    function abrirModalNovo() {
-      document.getElementById("modalNovo").classList.remove("hidden");
-      document.getElementById("data").value = new Date().toISOString().split("T")[0];
-      document.getElementById("tipoReceita").checked = true;
-      document.getElementById("meio").value = "Velle";
-    }
-
-    function adicionarLancamento() {
-      let tipo = document.querySelector('input[name="tipo"]:checked').value;
-      let novo = {
-        tipo,
-        categoria: document.getElementById("categoria").value,
-        valor: parseFloat(document.getElementById("valor").value),
-        descricao: document.getElementById("descricao").value,
-        data: document.getElementById("data").value,
-        meio: document.getElementById("meio").value
-      };
-
-      lancamentos.push(novo);
-      localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
-      document.getElementById("modalNovo").classList.add("hidden");
-      limparCampos();
-      atualizarDashboard();
-    }
-
-    function abrirModalEditar(index) {
-      editIndex = index;
-      let l = lancamentos[index];
-
-      document.getElementById("dataEditar").value = l.data;
-      document.getElementById("categoriaEditar").value = l.categoria;
-      document.getElementById("valorEditar").value = l.valor;
-      document.getElementById("descricaoEditar").value = l.descricao;
-      document.getElementById("meioEditar").value = l.meio || "Velle";
-
-      if (l.tipo === "receita") {
-        document.getElementById("tipoEditarReceita").checked = true;
-      } else {
-        document.getElementById("tipoEditarDespesa").checked = true;
-      }
-
-      document.getElementById("modalEditar").classList.remove("hidden");
-    }
-
-    function salvarEdicao() {
-      if (editIndex === null) return;
-
-      let tipo = document.querySelector('input[name="tipoEditar"]:checked').value;
-      lancamentos[editIndex] = {
-        tipo,
-        categoria: document.getElementById("categoriaEditar").value,
-        valor: parseFloat(document.getElementById("valorEditar").value),
-        descricao: document.getElementById("descricaoEditar").value,
-        data: document.getElementById("dataEditar").value,
-        meio: document.getElementById("meioEditar").value
-      };
-
-      localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
-      document.getElementById("modalEditar").classList.add("hidden");
-      limparCampos();
-      atualizarDashboard();
-    }
-
-    function excluirLancamento() {
-      if (editIndex === null) return;
-      if (confirm("Deseja realmente excluir?")) {
-        lancamentos.splice(editIndex, 1);
-        localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
-        document.getElementById("modalEditar").classList.add("hidden");
-        atualizarDashboard();
-      }
-    }
-
-    function fecharModal(id) {
-      document.getElementById(id).classList.add("hidden");
-    }
-
-    function limparCampos() {
-      ["categoria", "valor", "descricao"].forEach(id => document.getElementById(id).value = "");
-      ["categoriaEditar", "valorEditar", "descricaoEditar"].forEach(id => document.getElementById(id).value = "");
-    }
-
-    function atualizarDashboard() {
-      let receitas = 0, despesas = 0;
-      let mesSelecionado = document.getElementById("filtroMes").value;
-      let dataDe = document.getElementById("dataDe").value;
-      let dataAte = document.getElementById("dataAte").value;
-
-      let lista = document.getElementById("listaLancamentos");
-      lista.innerHTML = "";
-
-      // 🔹 Sempre ordenar por data crescente
-      let lancOrdenados = [...lancamentos].sort((a, b) => new Date(a.data) - new Date(b.data));
-
-      lancOrdenados.forEach((l, index) => {
-        let mesLanc = l.data.split("-")[1];
-
-        // filtro por mês
-        if (mesSelecionado !== "todos" && mesLanc !== mesSelecionado) return;
-
-        // filtro por período
-        if (dataDe && l.data < dataDe) return;
-        if (dataAte && l.data > dataAte) return;
-
-        // acumula
-        if (l.tipo === "receita") receitas += l.valor;
-        else despesas += l.valor;
-
-        let div = document.createElement("div");
-        div.className = "bg-white p-3 rounded-2xl shadow flex justify-between cursor-pointer";
-        div.onclick = () => abrirModalEditar(lancamentos.indexOf(l));
-        div.innerHTML = `
-          <span>${formatarData(l.data)} - ${l.categoria} (${l.descricao || ""}) [${l.meio || "Velle"}]</span>
-          <span class="${l.tipo === "receita" ? "text-green-600" : "text-red-600"} font-bold">${formatarMoeda(l.valor)}</span>
-        `;
-        lista.appendChild(div);
-      });
-
-      document.getElementById("totalReceitas").innerText = formatarMoeda(receitas);
-      document.getElementById("totalDespesas").innerText = formatarMoeda(despesas);
-      document.getElementById("saldo").innerText = formatarMoeda(receitas - despesas);
-    }
-
     atualizarDashboard();
   </script>
 </body>
