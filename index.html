@@ -60,18 +60,42 @@
   <div id="modalNovo" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
     <div class="bg-white rounded-2xl shadow-lg p-5 w-96">
       <div class="flex justify-between items-center mb-3">
-      <h3 class="text-lg font-bold">Novo Lançamento</h3>
-      <button onclick="fecharModal('modalNovo')" class="text-gray-500 hover:text-gray-800 text-xl font-bold">&times;</button>
-    </div>
+        <h3 class="text-lg font-bold">Novo Lançamento</h3>
+        <button onclick="fecharModal('modalNovo')" class="text-gray-500 hover:text-gray-800 text-xl font-bold">&times;</button>
+      </div>
 
-      <select id="tipo" class="w-full border rounded-lg p-2 mb-2">
-        <option value="receita">Receita</option>
-        <option value="despesa">Despesa</option>
-      </select>
+      <!-- Data -->
+      <input id="data" type="date" class="w-full border rounded-lg p-2 mb-2">
+
+      <!-- Tipo -->
+      <div class="flex space-x-3 mb-2">
+        <label class="flex items-center space-x-1">
+          <input type="radio" name="tipo" id="tipoReceita" value="receita" checked>
+          <span>+ Receita</span>
+        </label>
+        <label class="flex items-center space-x-1">
+          <input type="radio" name="tipo" id="tipoDespesa" value="despesa">
+          <span>- Despesa</span>
+        </label>
+      </div>
+
+      <!-- Categoria -->
       <input id="categoria" class="w-full border rounded-lg p-2 mb-2" placeholder="Categoria">
-      <input id="valor" type="number" step="0.01" class="w-full border rounded-lg p-2 mb-2" placeholder="Valor">
-      <input id="descricao" class="w-full border rounded-lg p-2 mb-2" placeholder="Descrição">
-      <input id="data" type="date" class="w-full border rounded-lg p-2 mb-4">
+
+      <!-- Valor + Meio -->
+      <div class="flex space-x-2 mb-2">
+        <input id="valor" type="number" step="0.01" class="w-1/2 border rounded-lg p-2" placeholder="Valor">
+        <select id="meio" class="w-1/2 border rounded-lg p-2">
+          <option value="Velle" selected>Velle</option>
+          <option value="Dinheiro">Dinheiro</option>
+          <option value="Cartão">Cartão</option>
+          <option value="Outros">Outros</option>
+        </select>
+      </div>
+
+      <!-- Descrição -->
+      <input id="descricao" class="w-full border rounded-lg p-2 mb-4" placeholder="Descrição">
+
       <button onclick="adicionarLancamento()" class="bg-purple-600 text-white px-4 py-2 rounded-lg font-bold w-full">Salvar</button>
     </div>
   </div>
@@ -80,22 +104,46 @@
   <div id="modalEditar" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
     <div class="bg-white rounded-2xl shadow-lg p-5 w-96">
       <div class="flex justify-between items-center mb-3">
-      <h3 class="text-lg font-bold">Editar Lançamento</h3>
-     <button onclick="fecharModal('modalEditar')" class="text-gray-500 hover:text-gray-800 text-xl font-bold">&times;</button>
-  </div>
+        <h3 class="text-lg font-bold">Editar Lançamento</h3>
+        <button onclick="fecharModal('modalEditar')" class="text-gray-500 hover:text-gray-800 text-xl font-bold">&times;</button>
+      </div>
 
-      <select id="tipoEditar" class="w-full border rounded-lg p-2 mb-2">
-        <option value="receita">Receita</option>
-        <option value="despesa">Despesa</option>
-      </select>
+      <!-- Data -->
+      <input id="dataEditar" type="date" class="w-full border rounded-lg p-2 mb-2">
+
+      <!-- Tipo -->
+      <div class="flex space-x-3 mb-2">
+        <label class="flex items-center space-x-1">
+          <input type="radio" name="tipoEditar" id="tipoEditarReceita" value="receita">
+          <span>+ Receita</span>
+        </label>
+        <label class="flex items-center space-x-1">
+          <input type="radio" name="tipoEditar" id="tipoEditarDespesa" value="despesa">
+          <span>- Despesa</span>
+        </label>
+      </div>
+
+      <!-- Categoria -->
       <input id="categoriaEditar" class="w-full border rounded-lg p-2 mb-2" placeholder="Categoria">
-      <input id="valorEditar" type="number" step="0.01" class="w-full border rounded-lg p-2 mb-2" placeholder="Valor">
-      <input id="descricaoEditar" class="w-full border rounded-lg p-2 mb-2" placeholder="Descrição">
-      <input id="dataEditar" type="date" class="w-full border rounded-lg p-2 mb-4">
+
+      <!-- Valor + Meio -->
+      <div class="flex space-x-2 mb-2">
+        <input id="valorEditar" type="number" step="0.01" class="w-1/2 border rounded-lg p-2" placeholder="Valor">
+        <select id="meioEditar" class="w-1/2 border rounded-lg p-2">
+          <option value="Velle">Velle</option>
+          <option value="Dinheiro">Dinheiro</option>
+          <option value="Cartão">Cartão</option>
+          <option value="Outros">Outros</option>
+        </select>
+      </div>
+
+      <!-- Descrição -->
+      <input id="descricaoEditar" class="w-full border rounded-lg p-2 mb-4" placeholder="Descrição">
+
       <div class="flex justify-between">
         <button onclick="salvarEdicao()" class="bg-purple-600 text-white px-4 py-2 rounded-lg font-bold">Salvar</button>
         <button onclick="excluirLancamento()" class="bg-red-500 text-white px-4 py-2 rounded-lg font-bold">Excluir</button>
-      </div> 
+      </div>
     </div>
   </div>
 
@@ -103,61 +151,76 @@
     let lancamentos = JSON.parse(localStorage.getItem("lancamentos")) || [];
     let editIndex = null;
 
-  function formatarMoeda(valor) {
-  return "$ " + valor.toFixed(2);
-  }
-
-
+    function formatarMoeda(valor) {
+      return "$ " + valor.toFixed(2);
+    }
 
     function formatarData(dataStr) {
-    if (!dataStr) return "";
-    let [ano, mes, dia] = dataStr.split("-");
-    return `${dia}/${mes}/${ano}`;
+      if (!dataStr) return "";
+      let [ano, mes, dia] = dataStr.split("-");
+      return `${dia}/${mes}/${ano}`;
     }
 
     function abrirModalNovo() {
       document.getElementById("modalNovo").classList.remove("hidden");
+      document.getElementById("data").value = new Date().toISOString().split("T")[0];
+      document.getElementById("tipoReceita").checked = true;
+      document.getElementById("meio").value = "Velle";
+    }
+
+    function adicionarLancamento() {
+      let tipo = document.querySelector('input[name="tipo"]:checked').value;
+      let novo = {
+        tipo,
+        categoria: document.getElementById("categoria").value,
+        valor: parseFloat(document.getElementById("valor").value),
+        descricao: document.getElementById("descricao").value,
+        data: document.getElementById("data").value,
+        meio: document.getElementById("meio").value
+      };
+
+      lancamentos.push(novo);
+      localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
+      document.getElementById("modalNovo").classList.add("hidden");
+      limparCampos();
+      atualizarDashboard();
     }
 
     function abrirModalEditar(index) {
       editIndex = index;
       let l = lancamentos[index];
 
-      document.getElementById("tipoEditar").value = l.tipo;
+      document.getElementById("dataEditar").value = l.data;
       document.getElementById("categoriaEditar").value = l.categoria;
       document.getElementById("valorEditar").value = l.valor;
       document.getElementById("descricaoEditar").value = l.descricao;
-      document.getElementById("dataEditar").value = l.data;
+      document.getElementById("meioEditar").value = l.meio || "Velle";
+
+      if (l.tipo === "receita") {
+        document.getElementById("tipoEditarReceita").checked = true;
+      } else {
+        document.getElementById("tipoEditarDespesa").checked = true;
+      }
 
       document.getElementById("modalEditar").classList.remove("hidden");
     }
 
-    function adicionarLancamento() {
-      let novo = {
-        tipo: document.getElementById("tipo").value,
-        categoria: document.getElementById("categoria").value,
-        valor: parseFloat(document.getElementById("valor").value),
-        descricao: document.getElementById("descricao").value,
-        data: document.getElementById("data").value
-      };
-
-      lancamentos.push(novo);
-      localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
-      document.getElementById("modalNovo").classList.add("hidden");
-      atualizarDashboard();
-    }
-
     function salvarEdicao() {
       if (editIndex === null) return;
+
+      let tipo = document.querySelector('input[name="tipoEditar"]:checked').value;
       lancamentos[editIndex] = {
-        tipo: document.getElementById("tipoEditar").value,
+        tipo,
         categoria: document.getElementById("categoriaEditar").value,
         valor: parseFloat(document.getElementById("valorEditar").value),
         descricao: document.getElementById("descricaoEditar").value,
-        data: document.getElementById("dataEditar").value
+        data: document.getElementById("dataEditar").value,
+        meio: document.getElementById("meioEditar").value
       };
+
       localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
       document.getElementById("modalEditar").classList.add("hidden");
+      limparCampos();
       atualizarDashboard();
     }
 
@@ -175,6 +238,10 @@
       document.getElementById(id).classList.add("hidden");
     }
 
+    function limparCampos() {
+      ["categoria", "valor", "descricao"].forEach(id => document.getElementById(id).value = "");
+      ["categoriaEditar", "valorEditar", "descricaoEditar"].forEach(id => document.getElementById(id).value = "");
+    }
 
     function atualizarDashboard() {
       let receitas = 0, despesas = 0;
@@ -193,7 +260,7 @@
         div.className = "bg-white p-3 rounded-2xl shadow flex justify-between cursor-pointer";
         div.onclick = () => abrirModalEditar(index);
         div.innerHTML = `
-          <span>${formatarData(l.data)} - ${l.categoria} (${l.descricao || ""})</span>
+          <span>${formatarData(l.data)} - ${l.categoria} (${l.descricao || ""}) [${l.meio || "Velle"}]</span>
           <span class="${l.tipo === "receita" ? "text-green-600" : "text-red-600"} font-bold">${formatarMoeda(l.valor)}</span>
         `;
         lista.appendChild(div);
