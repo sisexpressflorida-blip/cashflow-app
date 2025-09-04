@@ -102,7 +102,7 @@
       <div class="flex space-x-2 mb-2">
         <input id="valor" type="number" step="0.01" class="w-1/2 border rounded-lg p-2 dark:bg-gray-700" placeholder="Valor">
         <select id="meio" class="w-1/2 border rounded-lg p-2 dark:bg-gray-700">
-          <option value="Velle" selected>Velle</option><option value="Dinheiro">Dinheiro</option>
+          <option value="Zelle" selected>Zelle</option><option value="Dinheiro">Dinheiro</option>
           <option value="Cartão">Cartão</option><option value="Outros">Outros</option>
         </select>
       </div>
@@ -127,7 +127,7 @@
       <div class="flex space-x-2 mb-2">
         <input id="valorEditar" type="number" step="0.01" class="w-1/2 border rounded-lg p-2 dark:bg-gray-700" placeholder="Valor">
         <select id="meioEditar" class="w-1/2 border rounded-lg p-2 dark:bg-gray-700">
-          <option value="Velle">Velle</option><option value="Dinheiro">Dinheiro</option>
+          <option value="Zelle">Zelle</option><option value="Dinheiro">Dinheiro</option>
           <option value="Cartão">Cartão</option><option value="Outros">Outros</option>
         </select>
       </div>
@@ -150,9 +150,9 @@
     function toggleDarkMode(){ document.documentElement.classList.toggle("dark"); }
     function toggleFiltros(){ document.getElementById("filtros").classList.toggle("hidden"); }
 
-    function abrirModalNovo(){ document.getElementById("modalNovo").classList.remove("hidden"); document.getElementById("data").value=new Date().toISOString().split("T")[0]; document.getElementById("tipoReceita").checked=true; document.getElementById("meio").value="Velle"; }
+    function abrirModalNovo(){ document.getElementById("modalNovo").classList.remove("hidden"); document.getElementById("data").value=new Date().toISOString().split("T")[0]; document.getElementById("tipoReceita").checked=true; document.getElementById("meio").value="Zelle"; }
     function adicionarLancamento(){ let tipo=document.querySelector('input[name="tipo"]:checked').value; let novo={tipo,categoria:document.getElementById("categoria").value,valor:parseFloat(document.getElementById("valor").value),descricao:document.getElementById("descricao").value,data:document.getElementById("data").value,meio:document.getElementById("meio").value}; lancamentos.push(novo); localStorage.setItem("lancamentos",JSON.stringify(lancamentos)); document.getElementById("modalNovo").classList.add("hidden"); limparCampos(); atualizarDashboard(); }
-    function abrirModalEditar(index){ editIndex=index; let l=lancamentos[index]; document.getElementById("dataEditar").value=l.data; document.getElementById("categoriaEditar").value=l.categoria; document.getElementById("valorEditar").value=l.valor; document.getElementById("descricaoEditar").value=l.descricao; document.getElementById("meioEditar").value=l.meio||"Velle"; if(l.tipo==="receita"){document.getElementById("tipoEditarReceita").checked=true;} else {document.getElementById("tipoEditarDespesa").checked=true;} document.getElementById("modalEditar").classList.remove("hidden"); }
+    function abrirModalEditar(index){ editIndex=index; let l=lancamentos[index]; document.getElementById("dataEditar").value=l.data; document.getElementById("categoriaEditar").value=l.categoria; document.getElementById("valorEditar").value=l.valor; document.getElementById("descricaoEditar").value=l.descricao; document.getElementById("meioEditar").value=l.meio||"Zelle"; if(l.tipo==="receita"){document.getElementById("tipoEditarReceita").checked=true;} else {document.getElementById("tipoEditarDespesa").checked=true;} document.getElementById("modalEditar").classList.remove("hidden"); }
     function salvarEdicao(){ if(editIndex===null)return; let tipo=document.querySelector('input[name="tipoEditar"]:checked').value; lancamentos[editIndex]={tipo,categoria:document.getElementById("categoriaEditar").value,valor:parseFloat(document.getElementById("valorEditar").value),descricao:document.getElementById("descricaoEditar").value,data:document.getElementById("dataEditar").value,meio:document.getElementById("meioEditar").value}; localStorage.setItem("lancamentos",JSON.stringify(lancamentos)); document.getElementById("modalEditar").classList.add("hidden"); limparCampos(); atualizarDashboard(); }
     function excluirLancamento(){ if(editIndex===null)return; if(confirm("Deseja realmente excluir?")){ lancamentos.splice(editIndex,1); localStorage.setItem("lancamentos",JSON.stringify(lancamentos)); document.getElementById("modalEditar").classList.add("hidden"); atualizarDashboard(); }}
     function fecharModal(id){ document.getElementById(id).classList.add("hidden"); }
@@ -172,7 +172,7 @@
       let receitas=0,despesas=0; let mesSelecionado=document.getElementById("filtroMes").value; let dataDe=document.getElementById("dataDe").value; let dataAte=document.getElementById("dataAte").value; let lista=document.getElementById("listaLancamentos"); lista.innerHTML=""; 
       let lancOrdenados=[...lancamentos].sort((a,b)=>new Date(a.data)-new Date(b.data)); let filtrados=[]; 
       lancOrdenados.forEach((l,index)=>{let mesLanc=l.data.split("-")[1]; if(mesSelecionado!=="todos"&&mesLanc!==mesSelecionado)return; if(dataDe&&l.data<dataDe)return; if(dataAte&&l.data>dataAte)return; filtrados.push(l); if(l.tipo==="receita")receitas+=l.valor; else despesas+=l.valor; 
-        let div=document.createElement("div"); div.className="bg-white dark:bg-gray-800 p-3 rounded-2xl shadow flex justify-between cursor-pointer"; div.onclick=()=>abrirModalEditar(lancamentos.indexOf(l)); div.innerHTML=`<span>${formatarData(l.data)} - ${l.categoria} (${l.descricao||""}) [${l.meio||"Velle"}]</span> <span class="${l.tipo==="receita"?"text-green-600":"text-red-600"} font-bold">${formatarMoeda(l.valor)}</span>`; lista.appendChild(div); }); 
+        let div=document.createElement("div"); div.className="bg-white dark:bg-gray-800 p-3 rounded-2xl shadow flex justify-between cursor-pointer"; div.onclick=()=>abrirModalEditar(lancamentos.indexOf(l)); div.innerHTML=`<span>${formatarData(l.data)} - ${l.categoria} (${l.descricao||""}) [${l.meio||"Zelle"}]</span> <span class="${l.tipo==="receita"?"text-green-600":"text-red-600"} font-bold">${formatarMoeda(l.valor)}</span>`; lista.appendChild(div); }); 
       document.getElementById("totalReceitas").innerText=formatarMoeda(receitas); document.getElementById("totalDespesas").innerText=formatarMoeda(despesas); document.getElementById("saldo").innerText=formatarMoeda(receitas-despesas); 
       atualizarGraficos(filtrados); 
     }
