@@ -30,9 +30,9 @@
     </div>
   </section>
 
-  <!-- Filtro -->
-  <div class="px-3 mb-3">
-    <label for="filtroMes" class="mr-2">Filtrar por mês:</label>
+  <!-- Filtros -->
+  <div class="px-3 mb-3 flex flex-wrap items-center space-x-2">
+    <label for="filtroMes">Mês:</label>
     <select id="filtroMes" class="border rounded-lg p-1" onchange="atualizarDashboard()">
       <option value="todos">Todos</option>
       <option value="01">Jan</option>
@@ -48,6 +48,12 @@
       <option value="11">Nov</option>
       <option value="12">Dez</option>
     </select>
+
+    <label for="dataDe" class="ml-3">De:</label>
+    <input type="date" id="dataDe" class="border rounded-lg p-1" onchange="atualizarDashboard()">
+
+    <label for="dataAte" class="ml-3">Até:</label>
+    <input type="date" id="dataAte" class="border rounded-lg p-1" onchange="atualizarDashboard()">
   </div>
 
   <!-- Lista de lançamentos -->
@@ -246,19 +252,32 @@
     function atualizarDashboard() {
       let receitas = 0, despesas = 0;
       let mesSelecionado = document.getElementById("filtroMes").value;
+      let dataDe = document.getElementById("dataDe").value;
+      let dataAte = document.getElementById("dataAte").value;
+
       let lista = document.getElementById("listaLancamentos");
       lista.innerHTML = "";
 
-      lancamentos.forEach((l, index) => {
+      // 🔹 Sempre ordenar por data crescente
+      let lancOrdenados = [...lancamentos].sort((a, b) => new Date(a.data) - new Date(b.data));
+
+      lancOrdenados.forEach((l, index) => {
         let mesLanc = l.data.split("-")[1];
+
+        // filtro por mês
         if (mesSelecionado !== "todos" && mesLanc !== mesSelecionado) return;
 
+        // filtro por período
+        if (dataDe && l.data < dataDe) return;
+        if (dataAte && l.data > dataAte) return;
+
+        // acumula
         if (l.tipo === "receita") receitas += l.valor;
         else despesas += l.valor;
 
         let div = document.createElement("div");
         div.className = "bg-white p-3 rounded-2xl shadow flex justify-between cursor-pointer";
-        div.onclick = () => abrirModalEditar(index);
+        div.onclick = () => abrirModalEditar(lancamentos.indexOf(l));
         div.innerHTML = `
           <span>${formatarData(l.data)} - ${l.categoria} (${l.descricao || ""}) [${l.meio || "Velle"}]</span>
           <span class="${l.tipo === "receita" ? "text-green-600" : "text-red-600"} font-bold">${formatarMoeda(l.valor)}</span>
