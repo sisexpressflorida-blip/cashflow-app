@@ -11,21 +11,21 @@
   <!-- Header -->
   <header class="bg-purple-700 text-white p-4 flex items-center">
     <img src="./igrejaFlorida.jpeg" alt="Logo" class="w-10 h-10 rounded-full mr-3">
-    <h1 class="text-xl font-bold">💰 Cashflow</h1>
+    <h1 class="text-xl font-bold">💰 Cashflow IAAP - Orlando</h1>
   </header>
 
   <!-- Resumo -->
   <section class="grid grid-cols-3 gap-2 p-3">
     <div class="bg-white rounded-2xl shadow p-3 text-center">
-      <p id="totalReceitas" class="text-green-600 font-bold text-lg">R$ 0,00</p>
+      <p id="totalReceitas" class="text-green-600 font-bold text-lg">$ 0,00</p>
       <span class="text-sm">Receitas</span>
     </div>
     <div class="bg-white rounded-2xl shadow p-3 text-center">
-      <p id="totalDespesas" class="text-red-600 font-bold text-lg">R$ 0,00</p>
+      <p id="totalDespesas" class="text-red-600 font-bold text-lg">$ 0,00</p>
       <span class="text-sm">Despesas</span>
     </div>
     <div class="bg-white rounded-2xl shadow p-3 text-center">
-      <p id="saldo" class="text-blue-600 font-bold text-lg">R$ 0,00</p>
+      <p id="saldo" class="text-blue-600 font-bold text-lg">$ 0,00</p>
       <span class="text-sm">Saldo</span>
     </div>
   </section>
@@ -59,7 +59,11 @@
   <!-- Modal Novo -->
   <div id="modalNovo" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
     <div class="bg-white rounded-2xl shadow-lg p-5 w-96">
-      <h3 class="text-lg font-bold mb-3">Novo Lançamento</h3>
+      <div class="flex justify-between items-center mb-3">
+      <h3 class="text-lg font-bold">Novo Lançamento</h3>
+      <button onclick="fecharModal('modalNovo')" class="text-gray-500 hover:text-gray-800 text-xl font-bold">&times;</button>
+    </div>
+
       <select id="tipo" class="w-full border rounded-lg p-2 mb-2">
         <option value="receita">Receita</option>
         <option value="despesa">Despesa</option>
@@ -75,7 +79,11 @@
   <!-- Modal Editar -->
   <div id="modalEditar" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
     <div class="bg-white rounded-2xl shadow-lg p-5 w-96">
-      <h3 class="text-lg font-bold mb-3">Editar Lançamento</h3>
+      <div class="flex justify-between items-center mb-3">
+      <h3 class="text-lg font-bold">Editar Lançamento</h3>
+     <button onclick="fecharModal('modalEditar')" class="text-gray-500 hover:text-gray-800 text-xl font-bold">&times;</button>
+  </div>
+
       <select id="tipoEditar" class="w-full border rounded-lg p-2 mb-2">
         <option value="receita">Receita</option>
         <option value="despesa">Despesa</option>
@@ -87,7 +95,7 @@
       <div class="flex justify-between">
         <button onclick="salvarEdicao()" class="bg-purple-600 text-white px-4 py-2 rounded-lg font-bold">Salvar</button>
         <button onclick="excluirLancamento()" class="bg-red-500 text-white px-4 py-2 rounded-lg font-bold">Excluir</button>
-      </div>
+      </div> 
     </div>
   </div>
 
@@ -95,14 +103,16 @@
     let lancamentos = JSON.parse(localStorage.getItem("lancamentos")) || [];
     let editIndex = null;
 
-    function formatarMoeda(valor) {
-      return valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-    }
+  function formatarMoeda(valor) {
+  return "$ " + valor.toFixed(2);
+  }
+
+
 
     function formatarData(dataStr) {
-      let data = new Date(dataStr);
-      let opcoes = { day: '2-digit', month: 'short', year: 'numeric' };
-      return data.toLocaleDateString("pt-BR", opcoes);
+    if (!dataStr) return "";
+    let [ano, mes, dia] = dataStr.split("-");
+    return `${dia}/${mes}/${ano}`;
     }
 
     function abrirModalNovo() {
@@ -160,6 +170,11 @@
         atualizarDashboard();
       }
     }
+
+    function fecharModal(id) {
+      document.getElementById(id).classList.add("hidden");
+    }
+
 
     function atualizarDashboard() {
       let receitas = 0, despesas = 0;
