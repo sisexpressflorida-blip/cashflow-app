@@ -7,9 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    tailwind.config = {
-      darkMode: 'class'
-    }
+    tailwind.config = { darkMode: 'class' }
   </script>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 dark:text-gray-200 transition-colors duration-300">
@@ -28,10 +26,8 @@
 
   <!-- Container principal -->
   <div class="flex flex-col md:flex-row">
-    
     <!-- Coluna esquerda (Resumo + Filtros + Lista) -->
     <div class="flex-1 p-3">
-
       <!-- Resumo -->
       <section class="grid grid-cols-3 gap-2 mb-3">
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow p-3 text-center">
@@ -48,7 +44,7 @@
         </div>
       </section>
 
-      <!-- Filtros (ocultos/visíveis via botão) -->
+      <!-- Filtros (toggle) -->
       <div id="filtros" class="hidden mb-4">
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow p-4 flex flex-wrap gap-3 items-center">
           <label for="filtroMes">Mês:</label>
@@ -56,7 +52,7 @@
             <option value="todos">Todos</option>
             <option value="01">Jan</option><option value="02">Fev</option><option value="03">Mar</option>
             <option value="04">Abr</option><option value="05">Mai</option><option value="06">Jun</option>
-            <option value="07">Jul</option><option value="08">Ago</option><option value="09">Set</option>
+            <option value="07">Julho</option><option value="08">Ago</option><option value="09">Set</option>
             <option value="10">Out</option><option value="11">Nov</option><option value="12">Dez</option>
           </select>
           <label for="dataDe">De:</label>
@@ -66,7 +62,7 @@
         </div>
       </div>
 
-      <!-- Lista de lançamentos -->
+      <!-- Lista -->
       <section id="listaLancamentos" class="space-y-2"></section>
     </div>
 
@@ -93,21 +89,28 @@
         <h3 class="text-lg font-bold">Novo Lançamento</h3>
         <button onclick="fecharModal('modalNovo')" class="text-gray-500 hover:text-gray-800 text-xl font-bold">&times;</button>
       </div>
+
       <input id="data" type="date" class="w-full border rounded-lg p-2 mb-2 dark:bg-gray-700">
+
       <div class="flex space-x-3 mb-2">
         <label class="flex items-center space-x-1"><input type="radio" name="tipo" id="tipoReceita" value="receita" checked><span>+ Receita</span></label>
         <label class="flex items-center space-x-1"><input type="radio" name="tipo" id="tipoDespesa" value="despesa"><span>- Despesa</span></label>
       </div>
-      <input id="categoria" class="w-full border rounded-lg p-2 mb-2 dark:bg-gray-700" placeholder="Categoria">
+
+      <!-- Categoria (combo dinâmico) -->
+      <select id="categoria" class="w-full border rounded-lg p-2 mb-2 dark:bg-gray-700"></select>
+
       <div class="flex space-x-2 mb-2">
         <input id="valor" type="number" step="0.01" class="w-1/2 border rounded-lg p-2 dark:bg-gray-700" placeholder="Valor">
         <select id="meio" class="w-1/2 border rounded-lg p-2 dark:bg-gray-700">
-          <option value="Zelle" selected>Zelle</option><option value="Dinheiro">Dinheiro</option>
+          <option value="Zelle" selected>Zelle</option>
+          <option value="Dinheiro">Dinheiro</option>
           <option value="Cartão">Cartão</option>
-          <option value="Trasf.Bancaria">Transf.Bancária</option> 
+          <option value="Transf.Bancária">Transf.Bancária</option>
           <option value="Outros">Outros</option>
         </select>
       </div>
+
       <input id="descricao" class="w-full border rounded-lg p-2 mb-4 dark:bg-gray-700" placeholder="Descrição">
       <button onclick="adicionarLancamento()" class="bg-purple-600 text-white px-4 py-2 rounded-lg font-bold w-full">Salvar</button>
     </div>
@@ -120,22 +123,30 @@
         <h3 class="text-lg font-bold">Editar Lançamento</h3>
         <button onclick="fecharModal('modalEditar')" class="text-gray-500 hover:text-gray-800 text-xl font-bold">&times;</button>
       </div>
+
       <input id="dataEditar" type="date" class="w-full border rounded-lg p-2 mb-2 dark:bg-gray-700">
+
       <div class="flex space-x-3 mb-2">
         <label class="flex items-center space-x-1"><input type="radio" name="tipoEditar" id="tipoEditarReceita" value="receita"><span>+ Receita</span></label>
         <label class="flex items-center space-x-1"><input type="radio" name="tipoEditar" id="tipoEditarDespesa" value="despesa"><span>- Despesa</span></label>
       </div>
-      <input id="categoriaEditar" class="w-full border rounded-lg p-2 mb-2 dark:bg-gray-700" placeholder="Categoria">
+
+      <!-- Categoria (combo dinâmico) -->
+      <select id="categoriaEditar" class="w-full border rounded-lg p-2 mb-2 dark:bg-gray-700"></select>
+
       <div class="flex space-x-2 mb-2">
         <input id="valorEditar" type="number" step="0.01" class="w-1/2 border rounded-lg p-2 dark:bg-gray-700" placeholder="Valor">
         <select id="meioEditar" class="w-1/2 border rounded-lg p-2 dark:bg-gray-700">
-          <option value="Zelle">Zelle</option><option value="Dinheiro">Dinheiro</option>
+          <option value="Zelle">Zelle</option>
+          <option value="Dinheiro">Dinheiro</option>
           <option value="Cartão">Cartão</option>
-          <option value="Trasf.Bancaria">Transf.Bancária</option>
-          </option><option value="Outros">Outros</option>
+          <option value="Transf.Bancária">Transf.Bancária</option>
+          <option value="Outros">Outros</option>
         </select>
-        </div>
+      </div>
+
       <input id="descricaoEditar" class="w-full border rounded-lg p-2 mb-4 dark:bg-gray-700" placeholder="Descrição">
+
       <div class="flex justify-between">
         <button onclick="salvarEdicao()" class="bg-purple-600 text-white px-4 py-2 rounded-lg font-bold">Salvar</button>
         <button onclick="excluirLancamento()" class="bg-red-500 text-white px-4 py-2 rounded-lg font-bold">Excluir</button>
@@ -144,42 +155,262 @@
   </div>
 
   <script>
+    // =========================
+    // Dados e utilitários
+    // =========================
+    const CATEGORIAS = {
+      receita: [
+        "Entrada",
+        "Eventos",
+        "Oferta",
+        "Vendas Cantina"
+      ],
+      despesa: [
+        "Aluguel",
+        "Internet",
+        "Energia Elétrica",
+        "Financeira",
+        "Honorários",
+        "Bancos",
+        "Mercadoria",
+        "Alimentação"
+      ]
+    };
+
     let lancamentos = JSON.parse(localStorage.getItem("lancamentos")) || [];
     let editIndex = null;
     let chartCategorias, chartMensal;
 
-    function formatarMoeda(valor){ return "$ " + valor.toFixed(2); }
-    function formatarData(dataStr){ if(!dataStr)return""; let[ano,mes,dia]=dataStr.split("-"); return `${dia}/${mes}/${ano}`;}
+    function formatarMoeda(valor){ return "$ " + (isNaN(valor)?0:valor).toFixed(2); }
+    function formatarData(dataStr){ if(!dataStr)return""; const [a,m,d]=dataStr.split("-"); return `${d}/${m}/${a}`; }
 
+    // =========================
+    // UI helpers
+    // =========================
     function toggleDarkMode(){ document.documentElement.classList.toggle("dark"); }
     function toggleFiltros(){ document.getElementById("filtros").classList.toggle("hidden"); }
-
-    function abrirModalNovo(){ document.getElementById("modalNovo").classList.remove("hidden"); document.getElementById("data").value=new Date().toISOString().split("T")[0]; document.getElementById("tipoReceita").checked=true; document.getElementById("meio").value="Zelle"; }
-    function adicionarLancamento(){ let tipo=document.querySelector('input[name="tipo"]:checked').value; let novo={tipo,categoria:document.getElementById("categoria").value,valor:parseFloat(document.getElementById("valor").value),descricao:document.getElementById("descricao").value,data:document.getElementById("data").value,meio:document.getElementById("meio").value}; lancamentos.push(novo); localStorage.setItem("lancamentos",JSON.stringify(lancamentos)); document.getElementById("modalNovo").classList.add("hidden"); limparCampos(); atualizarDashboard(); }
-    function abrirModalEditar(index){ editIndex=index; let l=lancamentos[index]; document.getElementById("dataEditar").value=l.data; document.getElementById("categoriaEditar").value=l.categoria; document.getElementById("valorEditar").value=l.valor; document.getElementById("descricaoEditar").value=l.descricao; document.getElementById("meioEditar").value=l.meio||"Zelle"; if(l.tipo==="receita"){document.getElementById("tipoEditarReceita").checked=true;} else {document.getElementById("tipoEditarDespesa").checked=true;} document.getElementById("modalEditar").classList.remove("hidden"); }
-    function salvarEdicao(){ if(editIndex===null)return; let tipo=document.querySelector('input[name="tipoEditar"]:checked').value; lancamentos[editIndex]={tipo,categoria:document.getElementById("categoriaEditar").value,valor:parseFloat(document.getElementById("valorEditar").value),descricao:document.getElementById("descricaoEditar").value,data:document.getElementById("dataEditar").value,meio:document.getElementById("meioEditar").value}; localStorage.setItem("lancamentos",JSON.stringify(lancamentos)); document.getElementById("modalEditar").classList.add("hidden"); limparCampos(); atualizarDashboard(); }
-    function excluirLancamento(){ if(editIndex===null)return; if(confirm("Deseja realmente excluir?")){ lancamentos.splice(editIndex,1); localStorage.setItem("lancamentos",JSON.stringify(lancamentos)); document.getElementById("modalEditar").classList.add("hidden"); atualizarDashboard(); }}
     function fecharModal(id){ document.getElementById(id).classList.add("hidden"); }
-    function limparCampos(){ ["categoria","valor","descricao"].forEach(id=>document.getElementById(id).value=""); ["categoriaEditar","valorEditar","descricaoEditar"].forEach(id=>document.getElementById(id).value=""); }
 
-    function atualizarGraficos(lancamentosFiltrados){ 
-      let categorias={}; lancamentosFiltrados.forEach(l=>{if(l.tipo==="despesa"){categorias[l.categoria]=(categorias[l.categoria]||0)+l.valor;}}); 
-      let labelsCat=Object.keys(categorias); let valoresCat=Object.values(categorias); if(chartCategorias)chartCategorias.destroy(); 
-      chartCategorias=new Chart(document.getElementById("graficoCategorias"),{type:"doughnut",data:{labels:labelsCat,datasets:[{data:valoresCat,backgroundColor:["#ef4444","#f97316","#eab308","#22c55e","#3b82f6","#a855f7"]}]}});
-
-      let receitasMes={},despesasMes={}; lancamentosFiltrados.forEach(l=>{let mes=l.data.slice(0,7); if(l.tipo==="receita"){receitasMes[mes]=(receitasMes[mes]||0)+l.valor;} else{despesasMes[mes]=(despesasMes[mes]||0)+l.valor;}}); 
-      let meses=[...new Set([...Object.keys(receitasMes),...Object.keys(despesasMes)])].sort(); if(chartMensal)chartMensal.destroy(); 
-      chartMensal=new Chart(document.getElementById("graficoMensal"),{type:"bar",data:{labels:meses,datasets:[{label:"Receitas",data:meses.map(m=>receitasMes[m]||0),backgroundColor:"#22c55e"},{label:"Despesas",data:meses.map(m=>despesasMes[m]||0),backgroundColor:"#ef4444"}]},options:{responsive:true,plugins:{legend:{position:"bottom"}},scales:{y:{beginAtZero:true}}}});
+    function limparCampos(){
+      ["valor","descricao"].forEach(id=>document.getElementById(id).value="");
+      ["valorEditar","descricaoEditar"].forEach(id=>document.getElementById(id).value="");
     }
 
-    function atualizarDashboard(){ 
-      let receitas=0,despesas=0; let mesSelecionado=document.getElementById("filtroMes").value; let dataDe=document.getElementById("dataDe").value; let dataAte=document.getElementById("dataAte").value; let lista=document.getElementById("listaLancamentos"); lista.innerHTML=""; 
-      let lancOrdenados=[...lancamentos].sort((a,b)=>new Date(a.data)-new Date(b.data)); let filtrados=[]; 
-      lancOrdenados.forEach((l,index)=>{let mesLanc=l.data.split("-")[1]; if(mesSelecionado!=="todos"&&mesLanc!==mesSelecionado)return; if(dataDe&&l.data<dataDe)return; if(dataAte&&l.data>dataAte)return; filtrados.push(l); if(l.tipo==="receita")receitas+=l.valor; else despesas+=l.valor; 
-        let div=document.createElement("div"); div.className="bg-white dark:bg-gray-800 p-3 rounded-2xl shadow flex justify-between cursor-pointer"; div.onclick=()=>abrirModalEditar(lancamentos.indexOf(l)); div.innerHTML=`<span>${formatarData(l.data)} - ${l.categoria} (${l.descricao||""}) [${l.meio||"Zelle"}]</span> <span class="${l.tipo==="receita"?"text-green-600":"text-red-600"} font-bold">${formatarMoeda(l.valor)}</span>`; lista.appendChild(div); }); 
-      document.getElementById("totalReceitas").innerText=formatarMoeda(receitas); document.getElementById("totalDespesas").innerText=formatarMoeda(despesas); document.getElementById("saldo").innerText=formatarMoeda(receitas-despesas); 
-      atualizarGraficos(filtrados); 
+    // Popular combos de categoria conforme tipo
+    function popularCategorias(selectId, tipo, valorSelecionado=null){
+      const sel = document.getElementById(selectId);
+      sel.innerHTML = ""; // limpa
+
+      const group = document.createElement("optgroup");
+      group.label = (tipo === "receita") ? "Receitas" : "Despesas";
+
+      (CATEGORIAS[tipo] || []).forEach(cat=>{
+        const opt = document.createElement("option");
+        opt.value = cat;
+        opt.textContent = cat;
+        group.appendChild(opt);
+      });
+
+      sel.appendChild(group);
+
+      // Seleciona valor
+      if(valorSelecionado && CATEGORIAS[tipo].includes(valorSelecionado)){
+        sel.value = valorSelecionado;
+      } else {
+        sel.selectedIndex = 0;
+      }
     }
+
+    // =========================
+    // Modal Novo
+    // =========================
+    function abrirModalNovo(){
+      document.getElementById("modalNovo").classList.remove("hidden");
+      document.getElementById("data").value = new Date().toISOString().split("T")[0];
+
+      // Defaults
+      document.getElementById("tipoReceita").checked = true;
+      document.getElementById("meio").value = "Zelle";
+      popularCategorias("categoria", "receita"); // carrega receitas por padrão
+
+      // Quando mudar o tipo, refaz as categorias
+      document.getElementById("tipoReceita").onchange = ()=>popularCategorias("categoria","receita");
+      document.getElementById("tipoDespesa").onchange = ()=>popularCategorias("categoria","despesa");
+    }
+
+    function adicionarLancamento(){
+      const tipo = document.querySelector('input[name="tipo"]:checked').value;
+      const valor = parseFloat(document.getElementById("valor").value);
+      if(isNaN(valor)){ alert("Informe um valor válido."); return; }
+
+      const novo = {
+        tipo,
+        categoria: document.getElementById("categoria").value,
+        valor,
+        descricao: document.getElementById("descricao").value,
+        data: document.getElementById("data").value,
+        meio: document.getElementById("meio").value
+      };
+      lancamentos.push(novo);
+      localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
+
+      fecharModal('modalNovo');
+      limparCampos();
+      atualizarDashboard();
+    }
+
+    // =========================
+    // Modal Editar
+    // =========================
+    function abrirModalEditar(index){
+      editIndex = index;
+      const l = lancamentos[index];
+
+      document.getElementById("dataEditar").value = l.data;
+      document.getElementById("valorEditar").value = l.valor;
+      document.getElementById("descricaoEditar").value = l.descricao || "";
+      document.getElementById("meioEditar").value = l.meio || "Zelle";
+
+      // Define o tipo e popula categorias coerentes
+      if(l.tipo === "receita") {
+        document.getElementById("tipoEditarReceita").checked = true;
+        popularCategorias("categoriaEditar","receita", l.categoria);
+      } else {
+        document.getElementById("tipoEditarDespesa").checked = true;
+        popularCategorias("categoriaEditar","despesa", l.categoria);
+      }
+
+      // Listeners para trocar categorias ao alterar tipo no editar
+      document.getElementById("tipoEditarReceita").onchange = ()=>popularCategorias("categoriaEditar","receita");
+      document.getElementById("tipoEditarDespesa").onchange = ()=>popularCategorias("categoriaEditar","despesa");
+
+      document.getElementById("modalEditar").classList.remove("hidden");
+    }
+
+    function salvarEdicao(){
+      if(editIndex===null) return;
+
+      const tipo = document.querySelector('input[name="tipoEditar"]:checked').value;
+      const valor = parseFloat(document.getElementById("valorEditar").value);
+      if(isNaN(valor)){ alert("Informe um valor válido."); return; }
+
+      lancamentos[editIndex] = {
+        tipo,
+        categoria: document.getElementById("categoriaEditar").value,
+        valor,
+        descricao: document.getElementById("descricaoEditar").value,
+        data: document.getElementById("dataEditar").value,
+        meio: document.getElementById("meioEditar").value
+      };
+      localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
+
+      fecharModal('modalEditar');
+      limparCampos();
+      atualizarDashboard();
+    }
+
+    function excluirLancamento(){
+      if(editIndex===null) return;
+      if(confirm("Deseja realmente excluir?")){
+        lancamentos.splice(editIndex, 1);
+        localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
+        fecharModal('modalEditar');
+        atualizarDashboard();
+      }
+    }
+
+    // =========================
+    // Gráficos
+    // =========================
+    function atualizarGraficos(lancamentosFiltrados){
+      // Despesas por categoria
+      const categorias = {};
+      lancamentosFiltrados.forEach(l=>{
+        if(l.tipo==="despesa"){
+          categorias[l.categoria] = (categorias[l.categoria]||0) + l.valor;
+        }
+      });
+      const labelsCat = Object.keys(categorias);
+      const valoresCat = Object.values(categorias);
+
+      if(chartCategorias) chartCategorias.destroy();
+      chartCategorias = new Chart(document.getElementById("graficoCategorias"), {
+        type:"doughnut",
+        data:{ labels:labelsCat, datasets:[{ data:valoresCat, backgroundColor:["#ef4444","#f97316","#eab308","#22c55e","#3b82f6","#a855f7","#06b6d4","#84cc16"] }] }
+      });
+
+      // Fluxo mensal
+      const receitasMes={}, despesasMes={};
+      lancamentosFiltrados.forEach(l=>{
+        const mes = l.data.slice(0,7);
+        if(l.tipo==="receita") receitasMes[mes]=(receitasMes[mes]||0)+l.valor;
+        else despesasMes[mes]=(despesasMes[mes]||0)+l.valor;
+      });
+
+      const meses = [...new Set([...Object.keys(receitasMes),...Object.keys(despesasMes)])].sort();
+      if(chartMensal) chartMensal.destroy();
+      chartMensal = new Chart(document.getElementById("graficoMensal"), {
+        type:"bar",
+        data:{
+          labels: meses,
+          datasets:[
+            {label:"Receitas", data: meses.map(m=>receitasMes[m]||0), backgroundColor:"#22c55e"},
+            {label:"Despesas", data: meses.map(m=>despesasMes[m]||0), backgroundColor:"#ef4444"}
+          ]
+        },
+        options:{ responsive:true, plugins:{ legend:{ position:"bottom" } }, scales:{ y:{ beginAtZero:true } } }
+      });
+    }
+
+    // =========================
+    // Dashboard
+    // =========================
+    function atualizarDashboard(){
+      let receitas=0, despesas=0;
+      const mesSelecionado = document.getElementById("filtroMes").value;
+      const dataDe = document.getElementById("dataDe").value;
+      const dataAte = document.getElementById("dataAte").value;
+      const lista = document.getElementById("listaLancamentos");
+      lista.innerHTML = "";
+
+      const ordenados = [...lancamentos].sort((a,b)=>new Date(a.data)-new Date(b.data));
+      const filtrados = [];
+
+      ordenados.forEach(l=>{
+        const mesLanc = l.data.split("-")[1];
+        if(mesSelecionado!=="todos" && mesLanc!==mesSelecionado) return;
+        if(dataDe && l.data < dataDe) return;
+        if(dataAte && l.data > dataAte) return;
+
+        filtrados.push(l);
+        if(l.tipo==="receita") receitas+=l.valor; else despesas+=l.valor;
+
+        const div = document.createElement("div");
+        div.className = "bg-white dark:bg-gray-800 p-3 rounded-2xl shadow flex justify-between cursor-pointer";
+        div.onclick = ()=>abrirModalEditar(lancamentos.indexOf(l));
+      div.innerHTML = `
+        <div class="flex flex-col flex-1">
+          <span>${formatarData(l.data)} - ${l.categoria} (${l.descricao||""})</span>
+        </div>
+        <div class="flex flex-col items-end">
+          <span class="${l.tipo==="receita"?"text-green-600":"text-red-600"} font-bold">
+            ${formatarMoeda(l.valor)}
+          </span>
+          <span class="text-gray-500 text-sm">[${l.meio||"Zelle"}]</span>
+        </div>
+      `;
+
+        lista.appendChild(div);
+      });
+
+      document.getElementById("totalReceitas").innerText = formatarMoeda(receitas);
+      document.getElementById("totalDespesas").innerText = formatarMoeda(despesas);
+      document.getElementById("saldo").innerText = formatarMoeda(receitas - despesas);
+
+      atualizarGraficos(filtrados);
+    }
+
+    // Init
     atualizarDashboard();
   </script>
 </body>
