@@ -6,6 +6,9 @@
   <title>Cashflow</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script>
     tailwind.config = { darkMode: 'class' }
   </script>
@@ -21,6 +24,8 @@
     <div class="flex space-x-3">
       <button onclick="toggleFiltros()" class="bg-white/20 px-3 py-1 rounded-lg hover:bg-white/30">🔍 Filtros</button>
       <button onclick="toggleDarkMode()" class="bg-white/20 px-3 py-1 rounded-lg hover:bg-white/30">🌙</button>
+      <button onclick="exportarExcel()" class="bg-white/20 px-3 py-1 rounded-lg hover:bg-white/30">📊 Excel</button>
+      <button onclick="exportarPDF()" class="bg-white/20 px-3 py-1 rounded-lg hover:bg-white/30">📄 PDF</button>
     </div>
   </header>
 
@@ -106,7 +111,7 @@
       <select id="categoria" class="w-full border rounded-lg p-2 mb-2 dark:bg-gray-700"></select>
 
       <div class="flex space-x-2 mb-2">
-        <input id="valor" type="number" step="0.01" class="w-1/2 border rounded-lg p-2 dark:bg-gray-700" placeholder="Valor">
+       <input id="valor" type="text" class="w-1/2 border rounded-lg p-2 dark:bg-gray-700" placeholder="Valor">
         <select id="meio" class="w-1/2 border rounded-lg p-2 dark:bg-gray-700">
           <option value="Zelle" selected>Zelle</option>
           <option value="Dinheiro">Dinheiro</option>
@@ -140,7 +145,7 @@
       <select id="categoriaEditar" class="w-full border rounded-lg p-2 mb-2 dark:bg-gray-700"></select>
 
       <div class="flex space-x-2 mb-2">
-        <input id="valorEditar" type="number" step="0.01" class="w-1/2 border rounded-lg p-2 dark:bg-gray-700" placeholder="Valor">
+        <input id="valorEditar" type="text" step="0.01" class="w-1/2 border rounded-lg p-2 dark:bg-gray-700" placeholder="Valor">
         <select id="meioEditar" class="w-1/2 border rounded-lg p-2 dark:bg-gray-700">
           <option value="Zelle">Zelle</option>
           <option value="Dinheiro">Dinheiro</option>
@@ -166,19 +171,21 @@
     const CATEGORIAS = {
       receita: [
         "Entrada",
-        "Eventos",
+        "Dizimo",
         "Oferta",
-        "Vendas Cantina"
+        "Cantina-Vendas"
       ],
       despesa: [
         "Aluguel",
+        "Catina-Compras",
         "Internet",
         "Energia Elétrica",
         "Financeira",
         "Honorários",
         "Bancos",
         "Mercadoria",
-        "Alimentação"
+        "Alimentação",
+        "Parcela"
       ]
     };
 
@@ -186,7 +193,13 @@
     let editIndex = null;
     let chartCategorias, chartReceitas, chartMensal;
 
-    function formatarMoeda(valor){ return "$ " + (isNaN(valor)?0:valor).toFixed(2); }
+    function formatarMoeda(valor){
+    return "$ " + (isNaN(valor) ? 0 : valor).toLocaleString("pt-BR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  }
+
     function formatarData(dataStr){ if(!dataStr)return""; const [a,m,d]=dataStr.split("-"); return `${d}/${m}/${a}`; }
 
     // =========================
@@ -245,7 +258,9 @@
 
     function adicionarLancamento(){
       const tipo = document.querySelector('input[name="tipo"]:checked').value;
-      const valor = parseFloat(document.getElementById("valor").value);
+       const valor = parseFloat(
+       document.getElementById("valor").value.replace(/\$/g,"").replace(/\./g,"").replace(",",".")
+     );
       if(isNaN(valor)){ alert("Informe um valor válido."); return; }
 
       const novo = {
@@ -296,7 +311,10 @@
       if(editIndex===null) return;
 
       const tipo = document.querySelector('input[name="tipoEditar"]:checked').value;
-      const valor = parseFloat(document.getElementById("valorEditar").value);
+      const valor = parseFloat(
+      document.getElementById("valorEditar").value.replace(/\$/g,"").replace(/\./g,"").replace(",",".")
+      );
+
       if(isNaN(valor)){ alert("Informe um valor válido."); return; }
 
       lancamentos[editIndex] = {
@@ -383,6 +401,25 @@ function atualizarGraficos(lancamentosFiltrados){
   });
 }
 
+function aplicarMascaraMoeda(inputId){
+  const campo = document.getElementById(inputId);
+
+  campo.addEventListener("input", (e)=>{
+    let valor = e.target.value.replace(/\D/g,""); // remove tudo que não for número
+    if(!valor) {
+      e.target.value = "";
+      return;
+    }
+
+    valor = (parseInt(valor,10) / 100).toLocaleString("pt-BR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+
+    e.target.value = "$ " + valor;
+  });
+}
+
 
     // =========================
     // Dashboard
@@ -432,8 +469,35 @@ function atualizarGraficos(lancamentosFiltrados){
       atualizarGraficos(filtrados);
     }
 
+     // Exportar para PDF
+    async function exportarPDF(){
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF("p","pt","a4");
+    const area = document.body;
+    const canvas = await html2canvas(area,{scale:2});
+    const imgData = canvas.toDataURL("image/png");
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = (canvas.height * pageWidth) / canvas.width;
+    doc.addImage(imgData,"PNG",0,0,pageWidth,pageHeight);
+    doc.save("cashflow.pdf");
+  }
+
+  // Exportar para Excel
+  function exportarExcel(){
+    const ws = XLSX.utils.json_to_sheet(lancamentos);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Lancamentos");
+    XLSX.writeFile(wb, "cashflow.xlsx");
+  }
+
     // Init
     atualizarDashboard();
+    // Aplica a máscara nos campos de valor
+    aplicarMascaraMoeda("valor");
+    aplicarMascaraMoeda("valorEditar");
+
+
+    
   </script>
 </body>
 </html>
