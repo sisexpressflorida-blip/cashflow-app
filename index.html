@@ -22,7 +22,11 @@
       <h1 class="text-xl font-bold">💰 Cashflow IAAP - Orlando</h1>
     </div>
     <div class="flex flex-wrap gap-2">
-
+      <select id="moedaSelect" class="text-black rounded-lg p-1">
+        <option value="pt-BR|BRL">R$ - Real</option>
+        <option value="en-US|USD" selected>$ - Dólar</option>
+        <option value="en-GB|GBP">£ - Libra</option>
+      </select>
       <button onclick="toggleFiltros()" class="bg-white/20 px-3 py-1 rounded-lg hover:bg-white/30">🔍 Filtros</button>
       <button onclick="toggleDarkMode()" class="bg-white/20 px-3 py-1 rounded-lg hover:bg-white/30">🌙</button>
       <button onclick="exportarExcel()" class="bg-white/20 px-3 py-1 rounded-lg hover:bg-white/30">📊 Excel</button>
@@ -32,9 +36,7 @@
 
   <!-- Container principal -->
   <div class="flex flex-col md:flex-row">
-    <!-- Coluna esquerda (Resumo + Filtros + Lista) -->
     <div class="flex-1 p-3">
-      <!-- Resumo -->
       <section class="grid grid-cols-3 gap-2 mb-3">
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow p-3 text-center">
           <p id="totalReceitas" class="text-green-600 font-bold text-lg">$ 0.00</p>
@@ -49,8 +51,6 @@
           <span class="text-sm">Saldo</span>
         </div>
       </section>
-
-      <!-- Filtros (toggle) -->
       <div id="filtros" class="hidden mb-4">
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow p-4 flex flex-wrap gap-3 items-center">
           <label for="filtroMes">Mês:</label>
@@ -67,30 +67,25 @@
           <input type="date" id="dataAte" class="border rounded-lg p-1 dark:bg-gray-700" onchange="atualizarDashboard()">
         </div>
       </div>
-
-      <!-- Lista -->
       <section id="listaLancamentos" class="space-y-2"></section>
     </div>
 
-    <!-- Coluna direita (Gráficos em desktop, abaixo em mobile) -->
-  <aside class="md:w-1/3 p-3 space-y-4">
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow p-4">
-      <h3 class="text-center font-bold mb-2">Despesas por Categoria</h3>
-      <canvas id="graficoCategorias"></canvas>
-    </div>
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow p-4">
-      <h3 class="text-center font-bold mb-2">Receitas por Categoria</h3>
-      <canvas id="graficoReceitas"></canvas>
-    </div>
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow p-4">
-      <h3 class="text-center font-bold mb-2">Fluxo Mensal</h3>
-      <canvas id="graficoMensal"></canvas>
-    </div>
-  </aside>
-
+    <aside class="md:w-1/3 p-3 space-y-4">
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow p-4">
+        <h3 class="text-center font-bold mb-2">Despesas por Categoria</h3>
+        <canvas id="graficoCategorias"></canvas>
+      </div>
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow p-4">
+        <h3 class="text-center font-bold mb-2">Receitas por Categoria</h3>
+        <canvas id="graficoReceitas"></canvas>
+      </div>
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow p-4">
+        <h3 class="text-center font-bold mb-2">Fluxo Mensal</h3>
+        <canvas id="graficoMensal"></canvas>
+      </div>
+    </aside>
   </div>
 
-  <!-- Botão adicionar -->
   <button onclick="abrirModalNovo()" class="fixed bottom-6 right-6 bg-purple-600 text-white w-14 h-14 rounded-full text-2xl flex items-center justify-center shadow-lg">+</button>
 
   <!-- Modal Novo -->
@@ -100,19 +95,14 @@
         <h3 class="text-lg font-bold">Novo Lançamento</h3>
         <button onclick="fecharModal('modalNovo')" class="text-gray-500 hover:text-gray-800 text-xl font-bold">&times;</button>
       </div>
-
       <input id="data" type="date" class="w-full border rounded-lg p-2 mb-2 dark:bg-gray-700">
-
       <div class="flex space-x-3 mb-2">
         <label class="flex items-center space-x-1"><input type="radio" name="tipo" id="tipoReceita" value="receita" checked><span>+ Receita</span></label>
         <label class="flex items-center space-x-1"><input type="radio" name="tipo" id="tipoDespesa" value="despesa"><span>- Despesa</span></label>
       </div>
-
-      <!-- Categoria (combo dinâmico) -->
       <select id="categoria" class="w-full border rounded-lg p-2 mb-2 dark:bg-gray-700"></select>
-
       <div class="flex space-x-2 mb-2">
-       <input id="valor" type="text" class="w-1/2 border rounded-lg p-2 dark:bg-gray-700" placeholder="Valor">
+        <input id="valor" type="text" class="w-1/2 border rounded-lg p-2 dark:bg-gray-700" placeholder="Valor">
         <select id="meio" class="w-1/2 border rounded-lg p-2 dark:bg-gray-700">
           <option value="Zelle" selected>Zelle</option>
           <option value="Dinheiro">Dinheiro</option>
@@ -121,7 +111,6 @@
           <option value="Outros">Outros</option>
         </select>
       </div>
-
       <input id="descricao" class="w-full border rounded-lg p-2 mb-4 dark:bg-gray-700" placeholder="Descrição">
       <button onclick="adicionarLancamento()" class="bg-purple-600 text-white px-4 py-2 rounded-lg font-bold w-full">Salvar</button>
     </div>
@@ -134,19 +123,14 @@
         <h3 class="text-lg font-bold">Editar Lançamento</h3>
         <button onclick="fecharModal('modalEditar')" class="text-gray-500 hover:text-gray-800 text-xl font-bold">&times;</button>
       </div>
-
       <input id="dataEditar" type="date" class="w-full border rounded-lg p-2 mb-2 dark:bg-gray-700">
-
       <div class="flex space-x-3 mb-2">
         <label class="flex items-center space-x-1"><input type="radio" name="tipoEditar" id="tipoEditarReceita" value="receita"><span>+ Receita</span></label>
         <label class="flex items-center space-x-1"><input type="radio" name="tipoEditar" id="tipoEditarDespesa" value="despesa"><span>- Despesa</span></label>
       </div>
-
-      <!-- Categoria (combo dinâmico) -->
       <select id="categoriaEditar" class="w-full border rounded-lg p-2 mb-2 dark:bg-gray-700"></select>
-
       <div class="flex space-x-2 mb-2">
-        <input id="valorEditar" type="text" step="0.01" class="w-1/2 border rounded-lg p-2 dark:bg-gray-700" placeholder="Valor">
+        <input id="valorEditar" type="text" class="w-1/2 border rounded-lg p-2 dark:bg-gray-700" placeholder="Valor">
         <select id="meioEditar" class="w-1/2 border rounded-lg p-2 dark:bg-gray-700">
           <option value="Zelle">Zelle</option>
           <option value="Dinheiro">Dinheiro</option>
@@ -155,9 +139,7 @@
           <option value="Outros">Outros</option>
         </select>
       </div>
-
       <input id="descricaoEditar" class="w-full border rounded-lg p-2 mb-4 dark:bg-gray-700" placeholder="Descrição">
-
       <div class="flex justify-between">
         <button onclick="salvarEdicao()" class="bg-purple-600 text-white px-4 py-2 rounded-lg font-bold">Salvar</button>
         <button onclick="excluirLancamento()" class="bg-red-500 text-white px-4 py-2 rounded-lg font-bold">Excluir</button>
@@ -165,7 +147,10 @@
     </div>
   </div>
 
-  <script>
+<script>
+let currentLocale = "en-US";
+let currentCurrency = "USD";
+
     // =========================
     // Dados e utilitários
     // =========================
@@ -194,14 +179,39 @@
     let editIndex = null;
     let chartCategorias, chartReceitas, chartMensal;
 
-    function formatarMoeda(valor){
-    return "$ " + (isNaN(valor) ? 0 : valor).toLocaleString("pt-BR", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
-  }
+function formatarMoeda(valor){
+  const num = (isNaN(valor)?0:valor).toLocaleString(currentLocale,{
+    minimumFractionDigits:2,
+    maximumFractionDigits:2
+  });
 
-    function formatarData(dataStr){ if(!dataStr)return""; const [a,m,d]=dataStr.split("-"); return `${d}/${m}/${a}`; }
+  // pega símbolo manual
+  let symbol = "$";
+  if(currentCurrency === "BRL") symbol = "R$";
+  if(currentCurrency === "GBP") symbol = "£";
+  if(currentCurrency === "JPY") symbol = "¥";
+
+  return symbol + " " + num; // sempre com espaço
+}
+
+
+
+function formatarData(dataStr){ if(!dataStr)return""; const [a,m,d]=dataStr.split("-"); return `${d}/${m}/${a}`; }
+
+function aplicarMascaraMoeda(inputId){
+  const campo=document.getElementById(inputId);
+  campo.addEventListener("input",(e)=>{
+    let v=e.target.value.replace(/[^0-9]/g,"");
+    if(!v){e.target.value="";return;}
+    v=(parseInt(v,10)/100).toLocaleString(currentLocale,{minimumFractionDigits:2,maximumFractionDigits:2});
+    e.target.value=formatarMoeda(parseFloat(v.replace(/[^0-9.]/g,"")));
+  });
+}
+
+document.getElementById("moedaSelect").addEventListener("change",(e)=>{
+  [currentLocale,currentCurrency]=e.target.value.split("|");
+  atualizarDashboard();
+});
 
     // =========================
     // UI helpers
@@ -258,27 +268,35 @@
     }
 
     function adicionarLancamento(){
-      const tipo = document.querySelector('input[name="tipo"]:checked').value;
-       const valor = parseFloat(
-       document.getElementById("valor").value.replace(/\$/g,"").replace(/\./g,"").replace(",",".")
-     );
-      if(isNaN(valor)){ alert("Informe um valor válido."); return; }
+  const tipo = document.querySelector('input[name="tipo"]:checked').value;
+  let raw = document.getElementById("valor").value;
 
-      const novo = {
-        tipo,
-        categoria: document.getElementById("categoria").value,
-        valor,
-        descricao: document.getElementById("descricao").value,
-        data: document.getElementById("data").value,
-        meio: document.getElementById("meio").value
-      };
-      lancamentos.push(novo);
-      localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
+  raw = raw.replace(/[^\d,.-]/g, "");
+  if(currentLocale === "pt-BR"){
+    raw = raw.replace(/\./g, "").replace(",", ".");
+  } else {
+    raw = raw.replace(/,/g, "");
+  }
 
-      fecharModal('modalNovo');
-      limparCampos();
-      atualizarDashboard();
-    }
+  const valor = parseFloat(raw);
+  if(isNaN(valor)){ alert("Informe um valor válido."); return; }
+
+  const novo = {
+    tipo,
+    categoria: document.getElementById("categoria").value,
+    valor,
+    descricao: document.getElementById("descricao").value,
+    data: document.getElementById("data").value,
+    meio: document.getElementById("meio").value
+  };
+  lancamentos.push(novo);
+  localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
+
+  fecharModal('modalNovo');
+  limparCampos();
+  atualizarDashboard();
+}
+
 
     // =========================
     // Modal Editar
@@ -312,9 +330,20 @@
       if(editIndex===null) return;
 
       const tipo = document.querySelector('input[name="tipoEditar"]:checked').value;
-      const valor = parseFloat(
-      document.getElementById("valorEditar").value.replace(/\$/g,"").replace(/\./g,"").replace(",",".")
-      );
+      let raw = document.getElementById("valorEditar").value;
+
+      // remove símbolo de moeda e espaços
+      raw = raw.replace(/[^\d,.-]/g, "");
+
+      // se locale = pt-BR → vírgula é decimal
+      if(currentLocale === "pt-BR"){
+        raw = raw.replace(/\./g, "").replace(",", ".");
+      } else {
+        // locale en-US e similares → vírgula é milhar
+        raw = raw.replace(/,/g, "");
+      }
+
+      const valor = parseFloat(raw);
 
       if(isNaN(valor)){ alert("Informe um valor válido."); return; }
 
@@ -332,6 +361,7 @@
       limparCampos();
       atualizarDashboard();
     }
+
 
     function excluirLancamento(){
       if(editIndex===null) return;
@@ -412,7 +442,7 @@ function aplicarMascaraMoeda(inputId){
       return;
     }
 
-    valor = (parseInt(valor,10) / 100).toLocaleString("pt-BR", {
+    valor = (parseInt(valor,10) / 100).toLocaleString("en-US", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     });
@@ -497,8 +527,6 @@ function aplicarMascaraMoeda(inputId){
     aplicarMascaraMoeda("valor");
     aplicarMascaraMoeda("valorEditar");
 
-
-    
-  </script>
+</script>
 </body>
 </html>
