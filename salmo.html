@@ -2,28 +2,83 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Salmo do Dia</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Salmo</title>
   <style>
     body {
-      background: url('./igrejaFlorida.jpeg') no-repeat center center fixed;
-      background-size: cover;
+      background: radial-gradient(circle at top, #0f172a, #1e293b, #0f172a);
+      color: white;
+      font-family: 'Georgia', serif;
+      text-align: center;
+      padding: 50px;
+      line-height: 1.8;
+      position: relative;
+      height: 100vh;
     }
-    .overlay {
-      background-color: rgba(0, 0, 0, 0.6); /* escurece o fundo para dar contraste */
+
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 20px;
+      color: #fbbf24;
+      text-shadow: 0 0 10px rgba(251, 191, 36, 0.8);
+    }
+
+    #salmo {
+      font-size: 1.3em;
+      font-weight: bold;
+      display: inline-block;
+      white-space: pre-wrap;
+      overflow: hidden;
+      border-right: .15em solid rgba(255,255,255,0.6);
+      letter-spacing: .05em;
+
+      /* Efeito celestial */
+      background: linear-gradient(270deg, #fff 0%, #a5f3fc 25%, #f0abfc 50%, #fde68a 75%, #fff 100%);
+      background-size: 400% 400%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 8px rgba(255,255,255,0.6), 0 0 16px rgba(255,255,255,0.4);
+      animation: gradientMove 8s ease infinite, pulse 3s ease-in-out infinite;
+    }
+
+    @keyframes gradientMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes pulse {
+      0%, 100% { text-shadow: 0 0 8px rgba(255,255,255,0.6), 0 0 16px rgba(255,255,255,0.4); }
+      50% { text-shadow: 0 0 16px rgba(255,255,255,0.9), 0 0 32px rgba(255,255,255,0.6); }
+    }
+
+    .next-link {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      display: none; /* só aparece depois */
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      padding: 12px 16px;
+      border-radius: 50%;
+      text-decoration: none;
+      font-size: 1.5em;
+      box-shadow: 0 0 10px rgba(255,255,255,0.4);
+      transition: all 0.3s ease;
+    }
+
+    .next-link:hover {
+      background: rgba(255,255,255,0.3);
+      transform: scale(1.1);
+      box-shadow: 0 0 15px rgba(255,255,255,0.8);
     }
   </style>
 </head>
-<body class="flex items-center justify-center h-screen text-white">
-  <div class="overlay absolute inset-0"></div>
-  
-  <div class="relative bg-white bg-opacity-20 backdrop-blur-lg p-6 rounded-2xl shadow-2xl w-96 text-center z-10">
-    <h2 class="text-2xl font-bold mb-4">📖 Mensagem do dia</h2>
-    <p id="salmo" class="italic text-lg mb-6">Carregando...</p>
-    <button onclick="entrar()" class="bg-green-500 hover:bg-green-600 px-4 py-2 rounded-lg font-bold">
-      Continuar
-    </button>
-  </div>
+<body>
+  <h1>✨ Palavras do dia ! ✨</h1>
+  <div id="salmo"></div>
+
+  <!-- botão flutuante -->
+  <a href="cashflow.html" class="next-link" id="btnProximo">➡️</a>
 
   <script>
     const salmos = [
@@ -51,11 +106,23 @@
 
     function carregarSalmo() {
       const index = Math.floor(Math.random() * salmos.length);
-      document.getElementById("salmo").textContent = salmos[index];
-    }
+      const texto = salmos[index];
+      const elemento = document.getElementById("salmo");
+      elemento.textContent = "";
+      let i = 0;
 
-    function entrar() {
-      window.location.href = "cashflow.html"; // redireciona para o dashboard
+      function escrever() {
+        if (i < texto.length) {
+          elemento.textContent += texto.charAt(i);
+          i++;
+          setTimeout(escrever, 60); // velocidade da digitação
+        } else {
+          // quando terminar, mostra o botão
+          document.getElementById("btnProximo").style.display = "inline-block";
+        }
+      }
+
+      escrever();
     }
 
     carregarSalmo();
