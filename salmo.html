@@ -15,28 +15,36 @@
   </div>
 
   <script>
-    async function carregarSalmo() {
-      try {
-        // Escolhe um número de Salmo entre 1 e 150
-        const numero = Math.floor(Math.random() * 150) + 1;
-        const resp = await fetch(`https://www.abibliadigital.com.br/api/verses/nvi/sl/${numero}`);
-        const data = await resp.json();
+    const salmos = [
+      "O Senhor é o meu pastor, nada me faltará. (Salmo 23:1)",
+      "Entrega o teu caminho ao Senhor; confia nele, e o mais ele fará. (Salmo 37:5)",
+      "Deus é o nosso refúgio e fortaleza, socorro bem presente na angústia. (Salmo 46:1)",
+      "Bem-aventurado o homem que não anda segundo o conselho dos ímpios. (Salmo 1:1)",
+      "O Senhor é a minha luz e a minha salvação; a quem temerei? (Salmo 27:1)",
+      "Aquietai-vos e sabei que eu sou Deus. (Salmo 46:10)",
+      "Cria em mim, ó Deus, um coração puro e renova em mim um espírito inabalável. (Salmo 51:10)",
+      "A tua palavra é lâmpada para os meus pés e luz para o meu caminho. (Salmo 119:105)",
+      "O choro pode durar uma noite, mas a alegria vem pela manhã. (Salmo 30:5)",
+      "Clama a mim no dia da angústia; eu te livrarei, e tu me glorificarás. (Salmo 50:15)",
+      "Os que confiam no Senhor são como o monte Sião, que não se abala, firme para sempre. (Salmo 125:1)",
+      "Grandes coisas fez o Senhor por nós, pelas quais estamos alegres. (Salmo 126:3)",
+      "Examina-me, Senhor, e prova-me; sonda o meu coração e os meus pensamentos. (Salmo 26:2)",
+      "O Senhor é bom, um refúgio em tempos de angústia. Ele protege os que nele confiam. (Salmo 34:8)",
+      "Ensina-nos a contar os nossos dias, para que alcancemos coração sábio. (Salmo 90:12)",
+      "Sonda-me, ó Deus, e conhece o meu coração; prova-me e conhece as minhas inquietações. (Salmo 139:23)",
+      "Espera no Senhor, anima-te, e ele fortalecerá o teu coração. (Salmo 27:14)",
+      "O Senhor guarda a tua entrada e a tua saída, desde agora e para sempre. (Salmo 121:8)",
+      "Bem-aventurados os que habitam na tua casa; louvam-te perpetuamente. (Salmo 84:4)",
+      "Cantai ao Senhor um cântico novo, porque ele tem feito maravilhas. (Salmo 98:1)"
+    ];
 
-        if (data && data.chapter && data.verses) {
-          // pega apenas 1 ou 2 versos iniciais
-          const versos = data.verses.slice(0,2).map(v => v.text).join(" ");
-          document.getElementById("salmo").textContent = `Salmo ${data.chapter.number}: ${versos}`;
-        } else {
-          document.getElementById("salmo").textContent = "Não foi possível carregar o Salmo.";
-        }
-      } catch (e) {
-        console.error(e);
-        document.getElementById("salmo").textContent = "Erro ao buscar o Salmo.";
-      }
+    function carregarSalmo() {
+      const index = Math.floor(Math.random() * salmos.length);
+      document.getElementById("salmo").textContent = salmos[index];
     }
 
     function entrar() {
-      window.location.href = "cashflow.html"; // seu dashboard
+      window.location.href = "cashflow.html"; // redireciona para o dashboard
     }
 
     carregarSalmo();
