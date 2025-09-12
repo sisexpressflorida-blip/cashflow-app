@@ -64,21 +64,31 @@
       font-size: 1.5em;
       box-shadow: 0 0 10px rgba(255,255,255,0.4);
       transition: all 0.3s ease;
+      animation: pulsar 1.5s infinite;
+    }
+
+    @keyframes pulsar {
+      0% { transform: scale(1); box-shadow: 0 0 10px rgba(255,255,255,0.4); }
+      50% { transform: scale(1.2); box-shadow: 0 0 20px rgba(255,255,255,0.8); }
+      100% { transform: scale(1); box-shadow: 0 0 10px rgba(255,255,255,0.4); }
     }
 
     .next-link:hover {
       background: rgba(255,255,255,0.3);
-      transform: scale(1.1);
-      box-shadow: 0 0 15px rgba(255,255,255,0.8);
     }
   </style>
 </head>
 <body>
-  <h1>✨ Palavras do dia ! ✨</h1>
+  <h1>✨ Mensagem do Dia: ✨</h1>
   <div id="salmo"></div>
 
   <!-- botão flutuante -->
   <a href="cashflow.html" class="next-link" id="btnProximo">➡️</a>
+
+  <!-- música ambiente -->
+  <audio id="musicaFundo" autoplay loop>
+    <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c9c7a3a0e2.mp3?filename=gentle-harp-ambient-11099.mp3" type="audio/mpeg">
+  </audio>
 
   <script>
     const salmos = [
@@ -126,6 +136,13 @@
     }
 
     carregarSalmo();
+
+    // parar a música ao clicar no botão
+    document.getElementById("btnProximo").addEventListener("click", () => {
+      const musica = document.getElementById("musicaFundo");
+      musica.pause();
+      musica.currentTime = 0;
+    });
   </script>
 </body>
 </html>
