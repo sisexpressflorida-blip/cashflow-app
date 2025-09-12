@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Salmo do Dia</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex items-center justify-center h-screen bg-gradient-to-br from-purple-700 to-indigo-900 text-white">
+  <div class="bg-white bg-opacity-10 backdrop-blur-md p-6 rounded-2xl shadow-xl w-96 text-center">
+    <h2 class="text-2xl font-bold mb-4">📖 Salmo do Dia</h2>
+    <p id="salmo" class="italic text-lg mb-6">Carregando...</p>
+    <button onclick="entrar()" class="bg-green-500 hover:bg-green-600 px-4 py-2 rounded-lg font-bold">
+      Entrar no Sistema
+    </button>
+  </div>
+
+  <script>
+    async function carregarSalmo() {
+      try {
+        // Escolhe um número de Salmo entre 1 e 150
+        const numero = Math.floor(Math.random() * 150) + 1;
+        const resp = await fetch(`https://www.abibliadigital.com.br/api/verses/nvi/sl/${numero}`);
+        const data = await resp.json();
+
+        if (data && data.chapter && data.verses) {
+          // pega apenas 1 ou 2 versos iniciais
+          const versos = data.verses.slice(0,2).map(v => v.text).join(" ");
+          document.getElementById("salmo").textContent = `Salmo ${data.chapter.number}: ${versos}`;
+        } else {
+          document.getElementById("salmo").textContent = "Não foi possível carregar o Salmo.";
+        }
+      } catch (e) {
+        console.error(e);
+        document.getElementById("salmo").textContent = "Erro ao buscar o Salmo.";
+      }
+    }
+
+    function entrar() {
+      window.location.href = "cashflow.html"; // seu dashboard
+    }
+
+    carregarSalmo();
+  </script>
+</body>
+</html>
