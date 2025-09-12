@@ -18,7 +18,14 @@
     
     <!-- Inputs -->
     <input id="email" type="email" placeholder="Email" class="w-full border p-2 mb-2 rounded">
-    <input id="password" type="password" placeholder="Senha" class="w-full border p-2 mb-4 rounded">
+    
+    <!-- Campo senha com olho -->
+    <div class="relative w-full mb-4">
+      <input id="password" type="password" placeholder="Senha" class="w-full border p-2 rounded pr-10">
+      <button type="button" id="togglePassword" class="absolute inset-y-0 right-2 flex items-center text-gray-500">
+        👁️
+      </button>
+    </div>
     
     <!-- Botão -->
     <button id="loginButton" class="w-full bg-purple-600 text-white py-2 rounded-lg">Entrar</button>
@@ -31,6 +38,13 @@
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1temFkeHlhbG96dnJjd292cGFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwMTU2MDQsImV4cCI6MjA3MjU5MTYwNH0.U_G9AWD94BILXW82gnz7ngpkoOaTrbunbUpqgikTmBI";
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+    // Alternar senha visível/oculta
+    document.getElementById("togglePassword").addEventListener("click", () => {
+      const input = document.getElementById("password");
+      input.type = input.type === "password" ? "text" : "password";
+    });
+
+    // Login com Supabase
     document.getElementById("loginButton").addEventListener("click", async () => {
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
