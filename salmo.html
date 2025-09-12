@@ -2,92 +2,77 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Salmo</title>
   <style>
     body {
-      background: radial-gradient(circle at top, #0f172a, #1e293b, #0f172a);
-      color: white;
-      font-family: 'Georgia', serif;
-      text-align: center;
-      padding: 50px;
-      line-height: 1.8;
-      position: relative;
+      margin: 0;
       height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #0a2a66;
+      overflow: hidden;
+      color: white;
+      text-align: center;
+      font-family: "Georgia", serif;
     }
 
-    h1 {
-      font-size: 2.5em;
-      margin-bottom: 20px;
-      color: #fbbf24;
-      text-shadow: 0 0 10px rgba(251, 191, 36, 0.8);
+    /* Logo flutuante no fundo */
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: url('igrejaFlorida.jpeg') no-repeat center center;
+      background-size: 50%;
+      opacity: 0.15;
+      animation: flutuar 12s ease-in-out infinite alternate;
+    }
+
+    @keyframes flutuar {
+      from { transform: scale(1); opacity: 0.12; }
+      to { transform: scale(1.1); opacity: 0.18; }
     }
 
     #salmo {
-      font-size: 1.3em;
-      font-weight: bold;
-      display: inline-block;
-      white-space: pre-wrap;
-      overflow: hidden;
-      border-right: .15em solid rgba(255,255,255,0.6);
-      letter-spacing: .05em;
-
-      /* Efeito celestial */
-      background: linear-gradient(270deg, #fff 0%, #a5f3fc 25%, #f0abfc 50%, #fde68a 75%, #fff 100%);
-      background-size: 400% 400%;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow: 0 0 8px rgba(255,255,255,0.6), 0 0 16px rgba(255,255,255,0.4);
-      animation: gradientMove 8s ease infinite, pulse 3s ease-in-out infinite;
+      position: relative;
+      font-size: 2rem;
+      max-width: 800px;
+      text-shadow: 0 0 10px #fff, 0 0 20px #6ec1e4, 0 0 30px #b19cd9;
     }
 
-    @keyframes gradientMove {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-
-    @keyframes pulse {
-      0%, 100% { text-shadow: 0 0 8px rgba(255,255,255,0.6), 0 0 16px rgba(255,255,255,0.4); }
-      50% { text-shadow: 0 0 16px rgba(255,255,255,0.9), 0 0 32px rgba(255,255,255,0.6); }
-    }
-
-    .next-link {
+    /* Botão Próximo */
+    #proximo {
       position: fixed;
-      bottom: 30px;
-      right: 30px;
-      display: none; /* só aparece depois */
-      background: rgba(255,255,255,0.1);
-      color: #fff;
-      padding: 12px 16px;
+      bottom: 40px;
+      right: 40px;
+      display: none;
+      background: #1d4ed8;
+      color: white;
+      border: none;
+      padding: 15px 20px;
       border-radius: 50%;
-      text-decoration: none;
-      font-size: 1.5em;
-      box-shadow: 0 0 10px rgba(255,255,255,0.4);
-      transition: all 0.3s ease;
+      font-size: 1.5rem;
+      cursor: pointer;
       animation: pulsar 1.5s infinite;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
     }
 
     @keyframes pulsar {
-      0% { transform: scale(1); box-shadow: 0 0 10px rgba(255,255,255,0.4); }
-      50% { transform: scale(1.2); box-shadow: 0 0 20px rgba(255,255,255,0.8); }
-      100% { transform: scale(1); box-shadow: 0 0 10px rgba(255,255,255,0.4); }
-    }
-
-    .next-link:hover {
-      background: rgba(255,255,255,0.3);
+      0% { transform: scale(1); box-shadow: 0 0 10px #fff; }
+      50% { transform: scale(1.1); box-shadow: 0 0 20px #fff, 0 0 40px #6ec1e4; }
+      100% { transform: scale(1); box-shadow: 0 0 10px #fff; }
     }
   </style>
 </head>
 <body>
-  <h1>✨ Mensagem do Dia: ✨</h1>
   <div id="salmo"></div>
+  <button id="proximo" title="Próximo">➡️</button>
 
-  <!-- botão flutuante -->
-  <a href="cashflow.html" class="next-link" id="btnProximo">➡️</a>
-
-  <!-- música ambiente -->
-  <audio id="musicaFundo" autoplay loop>
-    <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c9c7a3a0e2.mp3?filename=gentle-harp-ambient-11099.mp3" type="audio/mpeg">
+  <!-- Música de fundo -->
+  <audio id="musica" autoplay loop>
+    <source src="https://files.catbox.moe/9x4d7f.mp3" type="audio/mpeg">
+    Seu navegador não suporta áudio.
   </audio>
 
   <script>
@@ -114,35 +99,33 @@
       "Cantai ao Senhor um cântico novo, porque ele tem feito maravilhas. (Salmo 98:1)"
     ];
 
-    function carregarSalmo() {
-      const index = Math.floor(Math.random() * salmos.length);
-      const texto = salmos[index];
-      const elemento = document.getElementById("salmo");
-      elemento.textContent = "";
+    function escreverTexto(texto, elemento, callback) {
       let i = 0;
-
-      function escrever() {
-        if (i < texto.length) {
-          elemento.textContent += texto.charAt(i);
-          i++;
-          setTimeout(escrever, 60); // velocidade da digitação
-        } else {
-          // quando terminar, mostra o botão
-          document.getElementById("btnProximo").style.display = "inline-block";
+      const intervalo = setInterval(() => {
+        elemento.textContent += texto.charAt(i);
+        i++;
+        if (i === texto.length) {
+          clearInterval(intervalo);
+          if (callback) callback();
         }
-      }
-
-      escrever();
+      }, 70);
     }
 
-    carregarSalmo();
+    window.onload = () => {
+      const salmoDiv = document.getElementById("salmo");
+      const proximo = document.getElementById("proximo");
+      const musica = document.getElementById("musica");
 
-    // parar a música ao clicar no botão
-    document.getElementById("btnProximo").addEventListener("click", () => {
-      const musica = document.getElementById("musicaFundo");
-      musica.pause();
-      musica.currentTime = 0;
-    });
+      const index = Math.floor(Math.random() * salmos.length);
+      escreverTexto(salmos[index], salmoDiv, () => {
+        proximo.style.display = "block";
+      });
+
+      proximo.addEventListener("click", () => {
+        musica.pause();
+        window.location.href = "cashflow.html";
+      });
+    };
   </script>
 </body>
 </html>
