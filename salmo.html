@@ -4,10 +4,21 @@
   <meta charset="UTF-8">
   <title>Salmo do Dia</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: url('./igrejaFlorida.jpeg') no-repeat center center fixed;
+      background-size: cover;
+    }
+    .overlay {
+      background-color: rgba(0, 0, 0, 0.6); /* escurece o fundo para dar contraste */
+    }
+  </style>
 </head>
-<body class="flex items-center justify-center h-screen bg-gradient-to-br from-purple-700 to-indigo-900 text-white">
-  <div class="bg-white bg-opacity-10 backdrop-blur-md p-6 rounded-2xl shadow-xl w-96 text-center">
-    <h2 class="text-2xl font-bold mb-4">📖 Salmo do Dia</h2>
+<body class="flex items-center justify-center h-screen text-white">
+  <div class="overlay absolute inset-0"></div>
+  
+  <div class="relative bg-white bg-opacity-20 backdrop-blur-lg p-6 rounded-2xl shadow-2xl w-96 text-center z-10">
+    <h2 class="text-2xl font-bold mb-4">📖 Mensagem do dia</h2>
     <p id="salmo" class="italic text-lg mb-6">Carregando...</p>
     <button onclick="entrar()" class="bg-green-500 hover:bg-green-600 px-4 py-2 rounded-lg font-bold">
       Continuar
@@ -51,4 +62,3 @@
   </script>
 </body>
 </html>
-
