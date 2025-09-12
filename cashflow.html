@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="transition-colors duration-300">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cashflow</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script>
+    tailwind.config = { darkMode: 'class' }
+  </script>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 dark:text-gray-200 transition-colors duration-300">
+
+  <!-- Header -->
+  <header class="bg-purple-700 dark:bg-purple-900 text-white p-4 flex flex-col md:flex-row md:justify-between md:items-center gap-2">
+    <div class="flex items-center">
+      <img src="./igrejaFlorida.jpeg" alt="Logo" class="w-10 h-10 rounded-full mr-3">
+      <h1 class="text-xl font-bold">💰 Cashflow IAAP - Orlando</h1>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <select id="moedaSelect" class="text-black rounded-lg p-1">
+        <option value="pt-BR|BRL">R$ - Real</option>
+        <option value="en-US|USD" selected>$ - Dólar</option>
+        <option value="en-GB|GBP">£ - Libra</option>
+      </select>
+      <button onclick="toggleFiltros()" class="bg-white/20 px-3 py-1 rounded-lg hover:bg-white/30">🔍 Filtros</button>
+      <button onclick="toggleDarkMode()" class="bg-white/20 px-3 py-1 rounded-lg hover:bg-white/30">🌙</button>
+      <button onclick="exportarExcel()" class="bg-white/20 px-3 py-1 rounded-lg hover:bg-white/30">📊 Excel</button>
+      <button onclick="exportarPDF()" class="bg-white/20 px-3 py-1 rounded-lg hover:bg-white/30">📄 PDF</button>
+    </div>
+  </header>
+
+  <!-- Container principal -->
+  <div class="flex flex-col md:flex-row">
+    <div class="flex-1 p-3">
+      <section class="grid grid-cols-3 gap-2 mb-3">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow p-3 text-center">
+          <p id="totalReceitas" class="text-green-600 font-bold text-lg">$ 0.00</p>
+          <span class="text-sm">Receitas</span>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow p-3 text-center">
+          <p id="totalDespesas" class="text-red-600 font-bold text-lg">$ 0.00</p>
+          <span class="text-sm">Despesas</span>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow p-3 text-center">
+          <p id="saldo" class="text-blue-600 font-bold text-lg">$ 0.00</p>
+          <span class="text-sm">Saldo</span>
+        </div>
+      </section>
+      <div id="filtros" class="hidden mb-4">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow p-4 flex flex-wrap gap-3 items-center">
+          <label for="filtroMes">Mês:</label>
+          <select id="filtroMes" class="border rounded-lg p-1 dark:bg-gray-700" onchange="atualizarDashboard()">
+            <option value="todos">Todos</option>
+            <option value="01">Jan</option><option value="02">Fev</option><option value="03">Mar</option>
+            <option value="04">Abr</option><option value="05">Mai</option><option value="06">Jun</option>
+            <option value="07">Julho</option><option value="08">Ago</option><option value="09">Set</option>
+            <option value="10">Out</option><option value="11">Nov</option><option value="12">Dez</option>
+          </select>
+          <label for="dataDe">De:</label>
+          <input type="date" id="dataDe" class="border rounded-lg p-1 dark:bg-gray-700" onchange="atualizarDashboard()">
+          <label for="dataAte">Até:</label>
+          <input type="date" id="dataAte" class="border rounded-lg p-1 dark:bg-gray-700" onchange="atualizarDashboard()">
+        </div>
+      </div>
+      <section id="listaLancamentos" class="space-y-2"></section>
+    </div>
+
+    <aside class="md:w-1/3 p-3 space-y-4">
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow p-4">
+        <h3 class="text-center font-bold mb-2">Despesas por Categoria</h3>
+        <canvas id="graficoCategorias"></canvas>
+      </div>
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow p-4">
+        <h3 class="text-center font-bold mb-2">Receitas por Categoria</h3>
+        <canvas id="graficoReceitas"></canvas>
+      </div>
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow p-4">
+        <h3 class="text-center font-bold mb-2">Fluxo Mensal</h3>
+        <canvas id="graficoMensal"></canvas>
+      </div>
+    </aside>
+  </div>
+
+  <button onclick="abrirModalNovo()" class="fixed bottom-6 right-6 bg-purple-600 text-white w-14 h-14 rounded-full text-2xl flex items-center justify-center shadow-lg">+</button>
+
+  <!-- Modal Novo -->
+  <div id="modalNovo" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-5 w-96">
+      <div class="flex justify-between items-center mb-3">
+        <h3 class="text-lg font-bold">Novo Lançamento</h3>
+        <button onclick="fecharModal('modalNovo')" class="text-gray-500 hover:text-gray-800 text-xl font-bold">&times;</button>
+      </div>
+      <input id="data" type="date" class="w-full border rounded-lg p-2 mb-2 dark:bg-gray-700">
+      <div class="flex space-x-3 mb-2">
+        <label class="flex items-center space-x-1"><input type="radio" name="tipo" id="tipoReceita" value="receita" checked><span>+ Receita</span></label>
+        <label class="flex items-center space-x-1"><input type="radio" name="tipo" id="tipoDespesa" value="despesa"><span>- Despesa</span></label>
+      </div>
+      <select id="categoria" class="w-full border rounded-lg p-2 mb-2 dark:bg-gray-700"></select>
+      <div class="flex space-x-2 mb-2">
+        <input id="valor" type="text" class="w-1/2 border rounded-lg p-2 dark:bg-gray-700" placeholder="Valor">
+        <select id="meio" class="w-1/2 border rounded-lg p-2 dark:bg-gray-700">
+          <option value="Zelle" selected>Zelle</option>
+          <option value="Dinheiro">Dinheiro</option>
+          <option value="Cartão">Cartão</option>
+          <option value="Transf.Bancária">Transf.Bancária</option>
+          <option value="Outros">Outros</option>
+        </select>
+      </div>
+      <input id="descricao" class="w-full border rounded-lg p-2 mb-4 dark:bg-gray-700" placeholder="Descrição">
+      <button onclick="adicionarLancamento()" class="bg-purple-600 text-white px-4 py-2 rounded-lg font-bold w-full">Salvar</button>
+    </div>
+  </div>
+
+  <!-- Modal Editar -->
+  <div id="modalEditar" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-5 w-96">
+      <div class="flex justify-between items-center mb-3">
+        <h3 class="text-lg font-bold">Editar Lançamento</h3>
+        <button onclick="fecharModal('modalEditar')" class="text-gray-500 hover:text-gray-800 text-xl font-bold">&times;</button>
+      </div>
+      <input id="dataEditar" type="date" class="w-full border rounded-lg p-2 mb-2 dark:bg-gray-700">
+      <div class="flex space-x-3 mb-2">
+        <label class="flex items-center space-x-1"><input type="radio" name="tipoEditar" id="tipoEditarReceita" value="receita"><span>+ Receita</span></label>
+        <label class="flex items-center space-x-1"><input type="radio" name="tipoEditar" id="tipoEditarDespesa" value="despesa"><span>- Despesa</span></label>
+      </div>
+      <select id="categoriaEditar" class="w-full border rounded-lg p-2 mb-2 dark:bg-gray-700"></select>
+      <div class="flex space-x-2 mb-2">
+        <input id="valorEditar" type="text" class="w-1/2 border rounded-lg p-2 dark:bg-gray-700" placeholder="Valor">
+        <select id="meioEditar" class="w-1/2 border rounded-lg p-2 dark:bg-gray-700">
+          <option value="Zelle">Zelle</option>
+          <option value="Dinheiro">Dinheiro</option>
+          <option value="Cartão">Cartão</option>
+          <option value="Transf.Bancária">Transf.Bancária</option>
+          <option value="Outros">Outros</option>
+        </select>
+      </div>
+      <input id="descricaoEditar" class="w-full border rounded-lg p-2 mb-4 dark:bg-gray-700" placeholder="Descrição">
+      <div class="flex justify-between">
+        <button onclick="salvarEdicao()" class="bg-purple-600 text-white px-4 py-2 rounded-lg font-bold">Salvar</button>
+        <button onclick="excluirLancamento()" class="bg-red-500 text-white px-4 py-2 rounded-lg font-bold">Excluir</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+let currentLocale = "en-US";
+let currentCurrency = "USD";
+
+    // =========================
+    // Dados e utilitários
+    // =========================
+    const CATEGORIAS = {
+      receita: [
+        "Entrada",
+        "Dizimo",
+        "Oferta",
+        "Cantina-Vendas"
+      ],
+      despesa: [
+        "Aluguel",
+        "Catina-Compras",
+        "Internet",
+        "Energia Elétrica",
+        "Financeira",
+        "Honorários",
+        "Bancos",
+        "Mercadoria",
+        "Alimentação",
+        "Parcela"
+      ]
+    };
+
+    let lancamentos = JSON.parse(localStorage.getItem("lancamentos")) || [];
+    let editIndex = null;
+    let chartCategorias, chartReceitas, chartMensal;
+
+function formatarMoeda(valor){
+  const num = (isNaN(valor)?0:valor).toLocaleString(currentLocale,{
+    minimumFractionDigits:2,
+    maximumFractionDigits:2
+  });
+
+  // pega símbolo manual
+  let symbol = "$";
+  if(currentCurrency === "BRL") symbol = "R$";
+  if(currentCurrency === "GBP") symbol = "£";
+  if(currentCurrency === "JPY") symbol = "¥";
+
+  return symbol + " " + num; // sempre com espaço
+}
+
+
+
+function formatarData(dataStr){ if(!dataStr)return""; const [a,m,d]=dataStr.split("-"); return `${d}/${m}/${a}`; }
+
+function aplicarMascaraMoeda(inputId){
+  const campo=document.getElementById(inputId);
+  campo.addEventListener("input",(e)=>{
+    let v=e.target.value.replace(/[^0-9]/g,"");
+    if(!v){e.target.value="";return;}
+    v=(parseInt(v,10)/100).toLocaleString(currentLocale,{minimumFractionDigits:2,maximumFractionDigits:2});
+    e.target.value=formatarMoeda(parseFloat(v.replace(/[^0-9.]/g,"")));
+  });
+}
+
+document.getElementById("moedaSelect").addEventListener("change",(e)=>{
+  [currentLocale,currentCurrency]=e.target.value.split("|");
+  atualizarDashboard();
+});
+
+    // =========================
+    // UI helpers
+    // =========================
+    function toggleDarkMode(){ document.documentElement.classList.toggle("dark"); }
+    function toggleFiltros(){ document.getElementById("filtros").classList.toggle("hidden"); }
+    function fecharModal(id){ document.getElementById(id).classList.add("hidden"); }
+
+    function limparCampos(){
+      ["valor","descricao"].forEach(id=>document.getElementById(id).value="");
+      ["valorEditar","descricaoEditar"].forEach(id=>document.getElementById(id).value="");
+    }
+
+    // Popular combos de categoria conforme tipo
+    function popularCategorias(selectId, tipo, valorSelecionado=null){
+      const sel = document.getElementById(selectId);
+      sel.innerHTML = ""; // limpa
+
+      const group = document.createElement("optgroup");
+      group.label = (tipo === "receita") ? "Receitas" : "Despesas";
+
+      (CATEGORIAS[tipo] || []).forEach(cat=>{
+        const opt = document.createElement("option");
+        opt.value = cat;
+        opt.textContent = cat;
+        group.appendChild(opt);
+      });
+
+      sel.appendChild(group);
+
+      // Seleciona valor
+      if(valorSelecionado && CATEGORIAS[tipo].includes(valorSelecionado)){
+        sel.value = valorSelecionado;
+      } else {
+        sel.selectedIndex = 0;
+      }
+    }
+
+    // =========================
+    // Modal Novo
+    // =========================
+    function abrirModalNovo(){
+      document.getElementById("modalNovo").classList.remove("hidden");
+      document.getElementById("data").value = new Date().toISOString().split("T")[0];
+
+      // Defaults
+      document.getElementById("tipoReceita").checked = true;
+      document.getElementById("meio").value = "Zelle";
+      popularCategorias("categoria", "receita"); // carrega receitas por padrão
+
+      // Quando mudar o tipo, refaz as categorias
+      document.getElementById("tipoReceita").onchange = ()=>popularCategorias("categoria","receita");
+      document.getElementById("tipoDespesa").onchange = ()=>popularCategorias("categoria","despesa");
+    }
+
+    function adicionarLancamento(){
+  const tipo = document.querySelector('input[name="tipo"]:checked').value;
+  let raw = document.getElementById("valor").value;
+
+  raw = raw.replace(/[^\d,.-]/g, "");
+  if(currentLocale === "pt-BR"){
+    raw = raw.replace(/\./g, "").replace(",", ".");
+  } else {
+    raw = raw.replace(/,/g, "");
+  }
+
+  const valor = parseFloat(raw);
+  if(isNaN(valor)){ alert("Informe um valor válido."); return; }
+
+  const novo = {
+    tipo,
+    categoria: document.getElementById("categoria").value,
+    valor,
+    descricao: document.getElementById("descricao").value,
+    data: document.getElementById("data").value,
+    meio: document.getElementById("meio").value
+  };
+  lancamentos.push(novo);
+  localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
+
+  fecharModal('modalNovo');
+  limparCampos();
+  atualizarDashboard();
+}
+
+
+    // =========================
+    // Modal Editar
+    // =========================
+    function abrirModalEditar(index){
+      editIndex = index;
+      const l = lancamentos[index];
+
+      document.getElementById("dataEditar").value = l.data;
+      document.getElementById("valorEditar").value = l.valor;
+      document.getElementById("descricaoEditar").value = l.descricao || "";
+      document.getElementById("meioEditar").value = l.meio || "Zelle";
+
+      // Define o tipo e popula categorias coerentes
+      if(l.tipo === "receita") {
+        document.getElementById("tipoEditarReceita").checked = true;
+        popularCategorias("categoriaEditar","receita", l.categoria);
+      } else {
+        document.getElementById("tipoEditarDespesa").checked = true;
+        popularCategorias("categoriaEditar","despesa", l.categoria);
+      }
+
+      // Listeners para trocar categorias ao alterar tipo no editar
+      document.getElementById("tipoEditarReceita").onchange = ()=>popularCategorias("categoriaEditar","receita");
+      document.getElementById("tipoEditarDespesa").onchange = ()=>popularCategorias("categoriaEditar","despesa");
+
+      document.getElementById("modalEditar").classList.remove("hidden");
+    }
+
+    function salvarEdicao(){
+      if(editIndex===null) return;
+
+      const tipo = document.querySelector('input[name="tipoEditar"]:checked').value;
+      let raw = document.getElementById("valorEditar").value;
+
+      // remove símbolo de moeda e espaços
+      raw = raw.replace(/[^\d,.-]/g, "");
+
+      // se locale = pt-BR → vírgula é decimal
+      if(currentLocale === "pt-BR"){
+        raw = raw.replace(/\./g, "").replace(",", ".");
+      } else {
+        // locale en-US e similares → vírgula é milhar
+        raw = raw.replace(/,/g, "");
+      }
+
+      const valor = parseFloat(raw);
+
+      if(isNaN(valor)){ alert("Informe um valor válido."); return; }
+
+      lancamentos[editIndex] = {
+        tipo,
+        categoria: document.getElementById("categoriaEditar").value,
+        valor,
+        descricao: document.getElementById("descricaoEditar").value,
+        data: document.getElementById("dataEditar").value,
+        meio: document.getElementById("meioEditar").value
+      };
+      localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
+
+      fecharModal('modalEditar');
+      limparCampos();
+      atualizarDashboard();
+    }
+
+
+    function excluirLancamento(){
+      if(editIndex===null) return;
+      if(confirm("Deseja realmente excluir?")){
+        lancamentos.splice(editIndex, 1);
+        localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
+        fecharModal('modalEditar');
+        atualizarDashboard();
+      }
+    }
+
+    // =========================
+    // Gráficos
+    // =========================
+function atualizarGraficos(lancamentosFiltrados){
+  // Despesas por categoria
+  const categoriasDesp = {};
+  lancamentosFiltrados.forEach(l=>{
+    if(l.tipo==="despesa"){
+      categoriasDesp[l.categoria] = (categoriasDesp[l.categoria]||0) + l.valor;
+    }
+  });
+  const labelsDesp = Object.keys(categoriasDesp);
+  const valoresDesp = Object.values(categoriasDesp);
+
+  if(chartCategorias) chartCategorias.destroy();
+  chartCategorias = new Chart(document.getElementById("graficoCategorias"), {
+    type:"doughnut",
+    data:{ labels:labelsDesp, datasets:[{ data:valoresDesp, backgroundColor:["#ef4444","#f97316","#eab308","#22c55e","#3b82f6","#a855f7","#06b6d4","#84cc16"] }] }
+  });
+
+  // Receitas por categoria
+  const categoriasRec = {};
+  lancamentosFiltrados.forEach(l=>{
+    if(l.tipo==="receita"){
+      categoriasRec[l.categoria] = (categoriasRec[l.categoria]||0) + l.valor;
+    }
+  });
+  const labelsRec = Object.keys(categoriasRec);
+  const valoresRec = Object.values(categoriasRec);
+
+  if(chartReceitas) chartReceitas.destroy();
+  chartReceitas = new Chart(document.getElementById("graficoReceitas"), {
+    type:"doughnut",
+    data:{ labels:labelsRec, datasets:[{ data:valoresRec, backgroundColor:["#22c55e","#3b82f6","#a855f7","#06b6d4","#84cc16","#f59e0b","#10b981","#6366f1"] }] }
+  });
+
+  // Fluxo mensal
+  const receitasMes={}, despesasMes={};
+  lancamentosFiltrados.forEach(l=>{
+    const mes = l.data.slice(0,7);
+    if(l.tipo==="receita") receitasMes[mes]=(receitasMes[mes]||0)+l.valor;
+    else despesasMes[mes]=(despesasMes[mes]||0)+l.valor;
+  });
+
+  const meses = [...new Set([...Object.keys(receitasMes),...Object.keys(despesasMes)])].sort();
+  if(chartMensal) chartMensal.destroy();
+  chartMensal = new Chart(document.getElementById("graficoMensal"), {
+    type:"bar",
+    data:{
+      labels: meses,
+      datasets:[
+        {label:"Receitas", data: meses.map(m=>receitasMes[m]||0), backgroundColor:"#22c55e"},
+        {label:"Despesas", data: meses.map(m=>despesasMes[m]||0), backgroundColor:"#ef4444"}
+      ]
+    },
+    options:{ responsive:true, plugins:{ legend:{ position:"bottom" } }, scales:{ y:{ beginAtZero:true } } }
+  });
+}
+
+function aplicarMascaraMoeda(inputId){
+  const campo = document.getElementById(inputId);
+
+  campo.addEventListener("input", (e)=>{
+    let valor = e.target.value.replace(/\D/g,""); // remove tudo que não for número
+    if(!valor) {
+      e.target.value = "";
+      return;
+    }
+
+    valor = (parseInt(valor,10) / 100).toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+
+    e.target.value = "$ " + valor;
+  });
+}
+
+
+    // =========================
+    // Dashboard
+    // =========================
+    function atualizarDashboard(){
+      let receitas=0, despesas=0;
+      const mesSelecionado = document.getElementById("filtroMes").value;
+      const dataDe = document.getElementById("dataDe").value;
+      const dataAte = document.getElementById("dataAte").value;
+      const lista = document.getElementById("listaLancamentos");
+      lista.innerHTML = "";
+
+      const ordenados = [...lancamentos].sort((a,b)=>new Date(a.data)-new Date(b.data));
+      const filtrados = [];
+
+      ordenados.forEach(l=>{
+        const mesLanc = l.data.split("-")[1];
+        if(mesSelecionado!=="todos" && mesLanc!==mesSelecionado) return;
+        if(dataDe && l.data < dataDe) return;
+        if(dataAte && l.data > dataAte) return;
+
+        filtrados.push(l);
+        if(l.tipo==="receita") receitas+=l.valor; else despesas+=l.valor;
+
+        const div = document.createElement("div");
+        div.className = "bg-white dark:bg-gray-800 p-3 rounded-2xl shadow flex justify-between cursor-pointer";
+        div.onclick = ()=>abrirModalEditar(lancamentos.indexOf(l));
+      div.innerHTML = `
+        <div class="flex flex-col flex-1">
+          <span>${formatarData(l.data)} - ${l.categoria} (${l.descricao||""})</span>
+        </div>
+        <div class="flex flex-col items-end">
+          <span class="${l.tipo==="receita"?"text-green-600":"text-red-600"} font-bold">
+            ${formatarMoeda(l.valor)}
+          </span>
+          <span class="text-gray-500 text-sm">[${l.meio||"Zelle"}]</span>
+        </div>
+      `;
+
+        lista.appendChild(div);
+      });
+
+      document.getElementById("totalReceitas").innerText = formatarMoeda(receitas);
+      document.getElementById("totalDespesas").innerText = formatarMoeda(despesas);
+      document.getElementById("saldo").innerText = formatarMoeda(receitas - despesas);
+
+      atualizarGraficos(filtrados);
+    }
+
+     // Exportar para PDF
+    async function exportarPDF(){
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF("p","pt","a4");
+    const area = document.body;
+    const canvas = await html2canvas(area,{scale:2});
+    const imgData = canvas.toDataURL("image/png");
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = (canvas.height * pageWidth) / canvas.width;
+    doc.addImage(imgData,"PNG",0,0,pageWidth,pageHeight);
+    doc.save("cashflow.pdf");
+  }
+
+  // Exportar para Excel
+  function exportarExcel(){
+    const ws = XLSX.utils.json_to_sheet(lancamentos);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Lancamentos");
+    XLSX.writeFile(wb, "cashflow.xlsx");
+  }
+
+    // Init
+    atualizarDashboard();
+    // Aplica a máscara nos campos de valor
+    aplicarMascaraMoeda("valor");
+    aplicarMascaraMoeda("valorEditar");
+
+</script>
+</body>
+</html>
