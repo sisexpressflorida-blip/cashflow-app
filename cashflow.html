@@ -6,12 +6,10 @@
   <title>Cashflow</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <!-- jsPDF -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<!-- html2canvas -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
 
   <script>
     tailwind.config = { darkMode: 'class' }
@@ -19,9 +17,10 @@
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 dark:text-gray-200 transition-colors duration-300">
 
-  <!-- Header (só na tela, não exporta no PDF) -->
-  <header class="bg-purple-700 dark:bg-purple-900 text-white p-4 flex flex-col md:flex-row md:justify-between md:items-center gap-2">
+  <!-- Header -->
+  <header  class="bg-purple-700 dark:bg-purple-900 text-white p-4 flex flex-col md:flex-row md:justify-between md:items-center gap-2">
     <div class="flex items-center">
+      
       <h1 class="text-xl font-bold">💰 Cashflow IAAP - Orlando</h1>
     </div>
     <div class="flex flex-wrap gap-2">
@@ -37,7 +36,7 @@
     </div>
   </header>
 
-  <!-- SOMENTE ESSA ÁREA VAI PARA O PDF -->
+  <!-- Container principal -->
   <div id="relatorio" class="flex flex-col md:flex-row">
     <div class="flex-1 p-3">
       <section class="grid grid-cols-3 gap-2 mb-3">
@@ -54,7 +53,6 @@
           <span class="text-sm">Saldo</span>
         </div>
       </section>
-
       <div id="filtros" class="hidden mb-4">
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow p-4 flex flex-wrap gap-3 items-center">
           <label for="filtroMes">Mês:</label>
@@ -71,7 +69,6 @@
           <input type="date" id="dataAte" class="border rounded-lg p-1 dark:bg-gray-700" onchange="atualizarDashboard()">
         </div>
       </div>
-
       <section id="listaLancamentos" class="space-y-2"></section>
     </div>
 
@@ -90,13 +87,10 @@
       </div>
     </aside>
   </div>
-  <!-- FIM DO RELATÓRIO -->
 
-  <!-- Botão flutuante (funciona na tela, não vai no PDF) -->
   <button onclick="abrirModalNovo()" class="fixed bottom-6 right-6 bg-purple-600 text-white w-14 h-14 rounded-full text-2xl flex items-center justify-center shadow-lg">+</button>
 
-  <!-- Modais do seu código original continuam iguais -->
- <!-- Modal Novo -->
+  <!-- Modal Novo -->
   <div id="modalNovo" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-5 w-96">
       <div class="flex justify-between items-center mb-3">
@@ -158,14 +152,35 @@
 <script>
 let currentLocale = "en-US";
 let currentCurrency = "USD";
-const CATEGORIAS = {
-  receita: ["Entrada","Dizimo","Oferta","Cantina-Vendas"],
-  despesa: ["Aluguel","Catina-Compras","Internet","Energia Elétrica","Financeira","Honorários","Bancos","Mercadoria","Alimentação","Parcela","Mercado"]
-};
-let lancamentos = JSON.parse(localStorage.getItem("lancamentos")) || [];
-let editIndex = null;
-let chartCategorias, chartReceitas, chartMensal;
 
+    // =========================
+    // Dados e utilitários
+    // =========================
+    const CATEGORIAS = {
+      receita: [
+        "Entrada",
+        "Dizimo",
+        "Oferta",
+        "Cantina-Vendas"
+      ],
+      despesa: [
+        "Aluguel",
+        "Catina-Compras",
+        "Internet",
+        "Energia Elétrica",
+        "Financeira",
+        "Honorários",
+        "Bancos",
+        "Mercadoria",
+        "Alimentação",
+        "Parcela",
+        "Mercado"
+      ]
+    };
+
+    let lancamentos = JSON.parse(localStorage.getItem("lancamentos")) || [];
+    let editIndex = null;
+    let chartCategorias, chartReceitas, chartMensal;
 
 function formatarMoeda(valor){
   const num = (isNaN(valor)?0:valor).toLocaleString(currentLocale,{
@@ -488,52 +503,51 @@ function aplicarMascaraMoeda(inputId){
       atualizarGraficos(filtrados);
     }
 
-
-
-/* Exportar Excel */
-function exportarExcel(){
-  const ws = XLSX.utils.json_to_sheet(lancamentos);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Lancamentos");
-  XLSX.writeFile(wb, "cashflow.xlsx");
-}
-
+     // Exportar para PDF
+// Exportar para PDF em Landscape
 async function exportarPDF() {
-  const { jsPDF } = window.jspdf; // 👈 aqui já funciona se o script certo foi incluído
+  const { jsPDF } = window.jspdf;
+  const area = document.getElementById("relatorio");
 
-  const doc = new jsPDF("landscape", "pt", "a4");
-  const area = document.body;
-
+  // Renderiza a área em canvas
   const canvas = await html2canvas(area, { scale: 2 });
   const imgData = canvas.toDataURL("image/png");
 
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const pageHeight = doc.internal.pageSize.getHeight();
-  const imgWidth = pageWidth;
+  // Tamanhos do canvas
+  const imgWidth = 842; // largura A4 em pt (landscape: 842, portrait: 595)
   const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-  let heightLeft = imgHeight;
-  let position = 0;
+  // Cria PDF com altura dinâmica (baseada no conteúdo)
+  const doc = new jsPDF({
+    orientation: "portrait",   // pode ser "landscape"
+    unit: "pt",
+    format: [imgWidth, imgHeight]  // 👈 define largura x altura do PDF
+  });
 
-  doc.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-  heightLeft -= pageHeight;
-
-  while (heightLeft > 0) {
-    position = heightLeft - imgHeight;
-    doc.addPage();
-    doc.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
-  }
+  // Adiciona a imagem única
+  doc.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
 
   doc.save("cashflow.pdf");
 }
 
 
 
-/* Inicialização */
-atualizarDashboard();
-aplicarMascaraMoeda("valor");
-aplicarMascaraMoeda("valorEditar");
+
+
+  // Exportar para Excel
+  function exportarExcel(){
+    const ws = XLSX.utils.json_to_sheet(lancamentos);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Lancamentos");
+    XLSX.writeFile(wb, "cashflow.xlsx");
+  }
+
+    // Init
+    atualizarDashboard();
+    // Aplica a máscara nos campos de valor
+    aplicarMascaraMoeda("valor");
+    aplicarMascaraMoeda("valorEditar");
+
 </script>
 </body>
 </html>
