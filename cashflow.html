@@ -199,7 +199,14 @@ function formatarMoeda(valor){
 
 
 
-function formatarData(dataStr){ if(!dataStr)return""; const [a,m,d]=dataStr.split("-"); return `${m}/${d}/${a}`; }
+//function formatarData(dataStr){ if(!dataStr)return""; const [a,m,d]=dataStr.split("-"); return `${m}/${d}/${a}`; }
+
+function formatarData(dataStr){
+  if(!dataStr) return "";
+  const meses = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+  const [ano, mes, dia] = dataStr.split("-");
+  return `${meses[parseInt(mes,10)-1]}-${dia}/${ano}`;
+}
 
 function aplicarMascaraMoeda(inputId){
   const campo=document.getElementById(inputId);
@@ -514,7 +521,7 @@ async function exportarPDF() {
   const imgData = canvas.toDataURL("image/png");
 
   // Tamanhos do canvas
-  const imgWidth = 842; // largura A4 em pt (landscape: 842, portrait: 595)
+  const imgWidth = 850; // largura A4 em pt (landscape: 842, portrait: 595)
   const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
   // Cria PDF com altura dinâmica (baseada no conteúdo)
