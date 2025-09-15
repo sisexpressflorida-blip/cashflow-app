@@ -199,7 +199,7 @@ function formatarMoeda(valor){
 
 
 
-function formatarData(dataStr){ if(!dataStr)return""; const [a,m,d]=dataStr.split("-"); return `${d}/${m}/${a}`; }
+function formatarData(dataStr){ if(!dataStr)return""; const [a,m,d]=dataStr.split("-"); return `${m}/${d}/${a}`; }
 
 function aplicarMascaraMoeda(inputId){
   const campo=document.getElementById(inputId);
