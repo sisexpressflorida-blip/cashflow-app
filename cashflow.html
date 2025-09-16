@@ -10,7 +10,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
-
   <script>
     tailwind.config = { darkMode: 'class' }
   </script>
@@ -20,7 +19,6 @@
   <!-- Header -->
   <header  class="bg-purple-700 dark:bg-purple-900 text-white p-4 flex flex-col md:flex-row md:justify-between md:items-center gap-2">
     <div class="flex items-center">
-      
       <h1 class="text-xl font-bold">💰 Cashflow IAAP - Orlando</h1>
     </div>
     <div class="flex flex-wrap gap-2">
@@ -36,10 +34,10 @@
     </div>
   </header>
 
-  <!-- Container principal -->
+  <!-- Container principal / Relatório -->
   <div id="relatorio" class="flex flex-col md:flex-row">
     <div class="flex-1 p-3">
-      <section class="grid grid-cols-3 gap-2 mb-3">
+      <section class="grid grid-cols-4 gap-2 mb-3">
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow p-3 text-center">
           <p id="totalReceitas" class="text-green-600 font-bold text-lg">$ 0.00</p>
           <span class="text-sm">Receitas</span>
@@ -50,7 +48,11 @@
         </div>
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow p-3 text-center">
           <p id="saldo" class="text-blue-600 font-bold text-lg">$ 0.00</p>
-          <span class="text-sm">Saldo</span>
+          <span class="text-sm">Saldo (Período)</span>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow p-3 text-center">
+          <p id="saldoGeral" class="text-purple-600 font-bold text-lg">$ 0.00</p>
+          <span class="text-sm">Saldo Geral</span>
         </div>
       </section>
       <div id="filtros" class="hidden mb-4">
@@ -199,8 +201,7 @@ function formatarMoeda(valor){
 
 
 
-//function formatarData(dataStr){ if(!dataStr)return""; const [a,m,d]=dataStr.split("-"); return `${m}/${d}/${a}`; }
-
+//function formatarData(dataStr){ if(!dataStr)return""; const [a,m,d]=dataStr.split("-"); return `${d}/${m}/${a}`; }
 function formatarData(dataStr){
   if(!dataStr) return "";
   const meses = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
@@ -507,11 +508,17 @@ function aplicarMascaraMoeda(inputId){
       document.getElementById("totalDespesas").innerText = formatarMoeda(despesas);
       document.getElementById("saldo").innerText = formatarMoeda(receitas - despesas);
 
+      // Saldo Geral da base inteira
+      let totalReceitasGeral = lancamentos.filter(l=>l.tipo==="receita").reduce((acc,l)=>acc+l.valor,0);
+      let totalDespesasGeral = lancamentos.filter(l=>l.tipo==="despesa").reduce((acc,l)=>acc+l.valor,0);
+      let saldoGeral = totalReceitasGeral - totalDespesasGeral;
+      document.getElementById("saldoGeral").innerText = formatarMoeda(saldoGeral);
+
       atualizarGraficos(filtrados);
     }
 
      // Exportar para PDF
-// Exportar para PDF em Landscape
+// Exportar para PDF em formato único (altura dinâmica)
 async function exportarPDF() {
   const { jsPDF } = window.jspdf;
   const area = document.getElementById("relatorio");
@@ -536,7 +543,6 @@ async function exportarPDF() {
 
   doc.save("cashflow.pdf");
 }
-
 
 
 
